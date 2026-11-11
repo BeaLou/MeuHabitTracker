@@ -5,6 +5,7 @@ import { Icon, type IconName } from './components/Icon';
 import { Sheet } from './components/Sheet';
 import { TaskForm } from './components/TaskForm';
 import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher } from './hooks';
+import { AgendaScreen } from './screens/AgendaScreen';
 import { CategoriesScreen } from './screens/CategoriesScreen';
 import { HabitDetail, type DetailTab } from './screens/HabitDetail';
 import { HabitsScreen } from './screens/HabitsScreen';
@@ -14,10 +15,11 @@ import { TimerScreen } from './screens/TimerScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { useAppState } from './store';
 
-type Tab = 'today' | 'habits' | 'tasks' | 'categories' | 'timer';
+type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'categories' | 'timer';
 
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'today', label: 'Hoje', icon: 'today' },
+  { id: 'agenda', label: 'Agenda', icon: 'calendar' },
   { id: 'habits', label: 'Hábitos', icon: 'habits' },
   { id: 'tasks', label: 'Tarefas', icon: 'tasks' },
   { id: 'categories', label: 'Categorias', icon: 'categories' },
@@ -41,7 +43,7 @@ export default function App() {
   const closeDetail = useCallback(() => setDetail(null), []);
 
   const task = state.tasks.find((t) => t.id === editTask);
-  const showFab = tab === 'today' || tab === 'habits' || tab === 'tasks';
+  const showFab = tab === 'today' || tab === 'agenda' || tab === 'habits' || tab === 'tasks';
   const onFab = () => setSheet(tab === 'habits' ? 'habit' : tab === 'tasks' ? 'task' : 'chooser');
 
   return (
@@ -54,6 +56,9 @@ export default function App() {
       <main className="screen">
         {tab === 'today' && (
           <TodayScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} onNewHabit={() => setSheet('habit')} />
+        )}
+        {tab === 'agenda' && (
+          <AgendaScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} />
         )}
         {tab === 'habits' && (
           <HabitsScreen state={state} onOpenHabit={(id, t) => setDetail({ id, tab: t })} onNewHabit={() => setSheet('habit')} />

@@ -10,6 +10,20 @@ import { syncNow } from './google/sync';
 import { notify } from './notify';
 import { store, useAppState } from './store';
 
+/** true enquanto a media query casar (ex.: tela larga). */
+export function useMediaQuery(query: string): boolean {
+  const [match, setMatch] = useState(() => (typeof matchMedia === 'function' ? matchMedia(query).matches : false));
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return;
+    const mq = matchMedia(query);
+    const on = () => setMatch(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, [query]);
+  return match;
+}
+
 /** Re-renderiza a cada `ms`. */
 export function useNow(ms: number): number {
   const [now, setNow] = useState(() => Date.now());

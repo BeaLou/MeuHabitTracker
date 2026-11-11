@@ -43,10 +43,10 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .cards { display: block; }
 
 .bottom-nav { position: absolute; left: 0; right: 0; bottom: 0; display: flex; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); z-index: 10; }
-.bottom-nav button { flex: 1; display: grid; justify-items: center; gap: 2px; padding: 6px 0; font-size: 11px; color: var(--muted); border-radius: 14px; }
+.bottom-nav button { flex: 1; display: grid; justify-items: center; gap: 2px; padding: 6px 0; font-size: 10px; color: var(--muted); border-radius: 14px; }
 .bottom-nav button.active { color: var(--text); }
 .bottom-nav button.active .pill { background: var(--accent-soft); color: var(--accent); }
-.bottom-nav .pill { padding: 3px 16px; border-radius: 999px; display: grid; place-items: center; }
+.bottom-nav .pill { padding: 3px 12px; border-radius: 999px; display: grid; place-items: center; }
 
 .fab { position: absolute; right: 18px; bottom: 86px; width: 56px; height: 56px; border-radius: 18px; background: var(--accent); color: white; display: grid; place-items: center; box-shadow: 0 8px 24px rgba(124, 92, 255, 0.45); z-index: 9; }
 .fab svg { width: 28px; height: 28px; stroke-width: 2.2; }
@@ -166,6 +166,35 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .toast { position: absolute; left: 16px; right: 16px; bottom: 90px; background: var(--surface-2); border: 1px solid var(--line); padding: 12px 14px; border-radius: 14px; z-index: 40; }
 
 /* ---------- desktop / telas largas ---------- */
+
+/* ---- Agenda (calendário mensal) ---- */
+.agenda-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.agenda-head .title { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+.agenda-head strong { font-size: 20px; }
+.agenda-head small { color: var(--muted); }
+.btn.small { padding: 6px 12px; font-size: 13px; min-height: 0; width: auto; }
+.mgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.mgrid .wd { text-align: center; font-size: 11px; color: var(--muted); padding: 6px 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.mcell { display: flex; flex-direction: column; align-items: stretch; gap: 2px; min-height: 84px; padding: 3px 2px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; overflow: hidden; min-width: 0; }
+.mcell.out { opacity: 0.4; }
+.mcell.sel { background: var(--accent-soft); }
+.mcell .num { align-self: center; font-size: 12px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; }
+.mcell.today .num { background: var(--accent); color: #fff; font-weight: 700; }
+.mchip { display: block; font-size: 9.5px; line-height: 1.25; padding: 1px 3px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mchip i { display: none; font-style: normal; opacity: 0.8; margin-right: 4px; }
+.mchip.allday { background: #2b6cb0; color: #fff; }
+.mchip.ev { background: rgba(66, 133, 244, 0.22); color: #bcd3ff; border-left: 2px solid #4285f4; }
+.mchip.hb { background: var(--surface-2); border-left: 2px solid var(--accent); }
+.mchip.hb.st-done { color: var(--green); text-decoration: line-through; }
+.mchip.hb.st-skipped { color: var(--muted); }
+.mchip.hb.st-missed { color: var(--red); }
+.mchip.tk { background: rgba(255, 176, 32, 0.16); color: var(--amber); }
+.mchip.tk.fin { text-decoration: line-through; opacity: 0.6; }
+.mmore { font-size: 10px; color: var(--muted); padding-left: 3px; }
+.legend { display: flex; gap: 14px; justify-content: center; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; }
+.legend .sw.ev { background: #4285f4; } .legend .sw.hb { background: var(--accent); } .legend .sw.tk { background: var(--amber); }
+
 @media (min-width: 900px) {
   .app { max-width: 1180px; display: grid; grid-template-columns: 230px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
   .topbar { grid-column: 2; grid-row: 1; padding: 24px 40px 12px; }
@@ -193,4 +222,13 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
   .toast { left: auto; right: 40px; max-width: 360px; }
   .icon-btn:hover, .chip:hover, .row:hover { background-color: var(--surface-2); }
   .row { border-radius: 12px; padding-left: 8px; padding-right: 8px; }
+}
+
+@media (min-width: 900px) {
+  .mcell { min-height: 112px; padding: 4px 4px; gap: 3px; }
+  .mcell:hover { background: var(--surface-2); }
+  .mcell.sel { background: var(--accent-soft); }
+  .mchip { font-size: 12px; padding: 2px 6px; }
+  .mchip i { display: inline; }
+  .mgrid .wd { font-size: 12px; }
 }

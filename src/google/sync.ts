@@ -1,4 +1,5 @@
 import { setGoogleState } from '../actions';
+import { eventsOnDay, type AgendaEvent } from '../core/agenda';
 import { addDays, fromKey, maxKey, todayKey, type DateKey } from '../core/dates';
 import { makeHabit, newId } from '../core/defaults';
 import type { CalendarLink, Frequency, Habit } from '../core/types';
@@ -6,7 +7,7 @@ import { store } from '../store';
 import {
   CalendarError, deleteEvent, getEvent, insertEvent, listEvents, patchEvent, timeZone, type GEvent,
 } from './calendar';
-import { eligibleForSync, eventToFields, habitToNewEvent, habitToPatch, HABIT_PROP } from './mapping';
+import { eligibleForSync, eventToAgenda, eventToFields, habitToNewEvent, habitToPatch, HABIT_PROP } from './mapping';
 
 export interface SyncReport {
   created: number;
@@ -211,7 +212,18 @@ export async function adoptCandidate(c: ImportCandidate, categoryId: string): Pr
   return habit;
 }
 
-/* ---------- agenda do dia ---------- */
+/* ---------- agenda (dia e mês) ---------- */
+
+/** Eventos entre duas datas (inclusive), já expandidos (recorrências viram uma linha por dia). */
+export async function listRangeEvents(from: DateKey, to: DateKey): Promise<AgendaEvent[]> {
+  const events = await listEvents({
+    timeMin: fromKey(from).toISOString(),
+    timeMax: fromKey(addDays(to, 1)).toISOString(),
+    singleEvents: 'true',
+    orderBy: 'startTime',
+  });
+  return events.map(eventToAgenda).filter((e): e is AgendaEvent => e !== null);
+}
 
 export interface DayEvent {
   id: string;
@@ -222,19 +234,6 @@ export interface DayEvent {
 }
 
 export async function listDayEvents(day: DateKey): Promise<DayEvent[]> {
-  const events = await listEvents({
-    timeMin: fromKey(day).toISOString(),
-    timeMax: fromKey(addDays(day, 1)).toISOString(),
-    singleEvents: 'true',
-    orderBy: 'startTime',
-  });
-  return events
-    .filter((e) => e.status !== 'cancelled')
-    .map((e) => ({
-      id: e.id,
-      title: e.summary?.trim() || '(sem título)',
-      start: e.start?.dateTime ? e.start.dateTime.slice(11, 16) : null,
-      end: e.end?.dateTime ? e.end.dateTime.slice(11, 16) : null,
-      linkedHabitId: e.extendedProperties?.private?.[HABIT_PROP] ?? null,
-    }));
+  const events = eventsOnDay(await listRangeEvents(day, day), day);
+  return events.map((e) => ({ id: e.id, title: e.title, start: e.start, end: e.end, linkedHabitId: e.linkedHabitId }));
 }

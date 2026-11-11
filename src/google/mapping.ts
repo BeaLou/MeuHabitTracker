@@ -1,4 +1,5 @@
-import { fromKey, toKey, type DateKey } from '../core/dates';
+import type { AgendaEvent } from '../core/agenda';
+import { addDays, fromKey, toKey, type DateKey } from '../core/dates';
 import type { Habit } from '../core/types';
 import type { GEvent } from './calendar';
 import { firstOccurrence, frequencyToRRule, parseRRule } from './rrule';
@@ -84,4 +85,25 @@ export function eventToFields(ev: GEvent): EventFields | null {
     reminderMinutes: ev.reminders?.useDefault === false && popup ? popup.minutes : null,
     ...(rule ? { frequency: rule.frequency, targetDate: rule.targetDate } : {}),
   };
+}
+
+/** Evento do Google -> item de exibição na Agenda do app. */
+export function eventToAgenda(ev: GEvent): AgendaEvent | null {
+  if (ev.status === 'cancelled') return null;
+  const title = ev.summary?.trim() || '(sem título)';
+  const linkedHabitId = ev.extendedProperties?.private?.[HABIT_PROP] ?? null;
+  if (ev.start?.dateTime) {
+    const startDate = ev.start.dateTime.slice(0, 10);
+    return {
+      id: ev.id, title, allDay: false, startDate, endDate: startDate, linkedHabitId,
+      start: ev.start.dateTime.slice(11, 16), end: ev.end?.dateTime ? ev.end.dateTime.slice(11, 16) : null,
+    };
+  }
+  if (ev.start?.date) {
+    const startDate = ev.start.date;
+    // no Google, o fim de eventos de dia inteiro é exclusivo
+    const last = ev.end?.date ? addDays(ev.end.date, -1) : startDate;
+    return { id: ev.id, title, allDay: true, startDate, endDate: last < startDate ? startDate : last, start: null, end: null, linkedHabitId };
+  }
+  return null;
 }

@@ -72,3 +72,24 @@ test('elegibilidade: precisa de horário, ligar a sincronização e não estar a
   assert.equal(eligibleForSync(makeHabit({ syncToCalendar: false, time: '09:00' })), false);
   assert.equal(eligibleForSync(makeHabit({ syncToCalendar: true, time: '09:00', archived: true })), false);
 });
+
+import { eventToAgenda } from './mapping';
+
+test('eventToAgenda: dia inteiro tem fim exclusivo no Google (vira inclusivo)', () => {
+  const a = eventToAgenda({ id: 'a', summary: 'Banco de horas', start: { date: '2026-12-20' }, end: { date: '2026-12-27' } })!;
+  assert.equal(a.allDay, true);
+  assert.equal(a.startDate, '2026-12-20');
+  assert.equal(a.endDate, '2026-12-26');
+  const one = eventToAgenda({ id: 'b', start: { date: '2026-11-05' }, end: { date: '2026-11-06' } })!;
+  assert.equal(one.endDate, '2026-11-05');
+  assert.equal(one.title, '(sem título)');
+});
+
+test('eventToAgenda: com horário, cancelado e vínculo', () => {
+  const t = eventToAgenda({
+    id: 'c', summary: 'Pilates', start: { dateTime: '2026-11-09T09:00:00-03:00' }, end: { dateTime: '2026-11-09T10:00:00-03:00' },
+    extendedProperties: { private: { ritmoHabitId: 'h1' } },
+  })!;
+  assert.deepEqual([t.allDay, t.start, t.end, t.startDate, t.endDate, t.linkedHabitId], [false, '09:00', '10:00', '2026-11-09', '2026-11-09', 'h1']);
+  assert.equal(eventToAgenda({ id: 'd', status: 'cancelled', start: { date: '2026-11-05' } }), null);
+});
