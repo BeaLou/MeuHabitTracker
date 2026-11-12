@@ -1,6 +1,6 @@
 /**
  * Login com Google Identity Services (token client, 100% no navegador, sem backend).
- * Escopos mínimos: eventos da agenda e a pasta privada do app no Drive. O token dura ~1 h e fica só na sessão da aba.
+ * Escopos mínimos: eventos da agenda e a pasta privada do app no Drive. O Google limita o token a ~1 h (sem backend não há como estender); o app renova sozinho em segundo plano e guarda o token neste aparelho.
  */
 
 // calendar.events: hábitos <-> eventos. drive.appdata: pasta privada do app no Drive (sync entre aparelhos).
@@ -65,7 +65,7 @@ interface StoredToken {
 
 function readToken(): StoredToken | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const t = JSON.parse(raw) as StoredToken;
     return t.expiresAt - 60_000 > Date.now() ? t : null;
@@ -76,14 +76,47 @@ function readToken(): StoredToken | null {
 
 function saveToken(t: StoredToken | null) {
   try {
-    if (t) sessionStorage.setItem(SESSION_KEY, JSON.stringify(t));
-    else sessionStorage.removeItem(SESSION_KEY);
+    if (t) localStorage.setItem(SESSION_KEY, JSON.stringify(t));
+    else localStorage.removeItem(SESSION_KEY);
   } catch {
     /* ignora */
   }
 }
 
 let client: TokenClient | null = null;
+
+/** Milissegundos até o token atual expirar (0 se não há token válido). */
+export function tokenMsLeft(): number {
+  const t = readToken();
+  return t ? t.expiresAt - Date.now() : 0;
+}
+
+/**
+ * Renovação silenciosa (prompt "none"): não abre popup. Funciona enquanto o usuário continua logado
+ * no Google no navegador e já autorizou o app; se não der, falha em silêncio e o fluxo normal segue.
+ */
+export async function renewTokenSilently(): Promise<boolean> {
+  if (!googleConfigured) return false;
+  try {
+    await loadScript();
+    const api = gis();
+    if (!api) return false;
+    return await new Promise<boolean>((resolve) => {
+      client ??= api.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: SCOPE, callback: () => undefined });
+      const timer = setTimeout(() => resolve(false), 15_000);
+      client.callback = (r) => {
+        clearTimeout(timer);
+        if (r.error || !r.access_token) return resolve(false);
+        saveToken({ value: r.access_token, expiresAt: Date.now() + (r.expires_in ?? 3600) * 1000 });
+        resolve(true);
+      };
+      client.error_callback = () => { clearTimeout(timer); resolve(false); };
+      client.requestAccessToken({ prompt: 'none' });
+    });
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Devolve um token válido. `interactive` = true quando vem de um clique do usuário

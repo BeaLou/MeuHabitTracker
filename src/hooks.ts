@@ -4,7 +4,7 @@ import { nowTimeKey, timeToMinutes, todayKey } from './core/dates';
 import { cellStatus, isDue } from './core/habits';
 import { shareSignature } from './core/merge';
 import type { AppState } from './core/types';
-import { googleConfigured } from './google/auth';
+import { googleConfigured, renewTokenSilently, tokenMsLeft } from './google/auth';
 import { driveSyncNow } from './google/drive';
 import { syncNow } from './google/sync';
 import { notify } from './notify';
@@ -167,4 +167,24 @@ export function useAutoDriveSync() {
       clearInterval(id);
     };
   }, [enabled]);
+}
+
+/** Mantém o login do Google vivo: renova em segundo plano quando faltam menos de 10 min (ou ao voltar para o app). */
+export function useTokenRenewal() {
+  const connected = useAppState().google.connected && googleConfigured;
+  useEffect(() => {
+    if (!connected) return;
+    let busy = false;
+    const check = async () => {
+      if (busy || tokenMsLeft() > 10 * 60_000) return;
+      busy = true;
+      await renewTokenSilently();
+      busy = false;
+    };
+    void check();
+    const id = setInterval(() => void check(), 60_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void check(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
+  }, [connected]);
 }

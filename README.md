@@ -34,7 +34,7 @@ Sem `VITE_GOOGLE_CLIENT_ID` o app funciona normalmente; só a integração com a
    `VITE_GOOGLE_CLIENT_ID=1234-abc.apps.googleusercontent.com`
 6. No app: ⚙ **Ajustes → Conectar Google Agenda**.
 
-Escopos pedidos: `calendar.events` (criar, ler e editar eventos) e `drive.appdata` (pasta privada do app no Drive: o app só vê o arquivo que ele mesmo cria, nunca seus outros arquivos). O token fica só na sessão da aba (~1 h) e é renovado ao sincronizar.
+Escopos pedidos: `calendar.events` (criar, ler e editar eventos) e `drive.appdata` (pasta privada do app no Drive: o app só vê o arquivo que ele mesmo cria, nunca seus outros arquivos). O Google limita o token de apps só de navegador a ~1 h. O app o renova sozinho em segundo plano (sem popup, enquanto você estiver logado no Google) e guarda o token neste aparelho; se a renovação falhar, basta tocar em Sincronizar para reconectar. Sessões realmente longas exigiriam um backend com refresh token.
 
 ## Como a sincronização funciona
 

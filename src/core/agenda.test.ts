@@ -19,8 +19,8 @@ test('evento de vários dias aparece em todos os dias do intervalo', () => {
 test('ordem do dia: dia inteiro, itens com horário misturados, hábitos sem horário, tarefas', () => {
   const allDay = ev({ id: 'a', title: 'Banco de horas', allDay: true, start: null, end: null });
   const noon = ev({ id: 'n', title: 'Almoço', start: '12:00' });
-  const morning = makeHabit({ id: 'h1', name: 'Pilates', time: '09:00' });
-  const anytime = makeHabit({ id: 'h2', name: 'Água', time: null });
+  const morning = makeHabit({ id: 'h1', name: 'Pilates', time: '09:00', startDate: '2026-01-01' });
+  const anytime = makeHabit({ id: 'h2', name: 'Água', time: null, startDate: '2026-01-01' });
   const task = makeTask({ id: 't', title: 'Pão', dueDate: '2026-11-11' });
   const items = dayItems('2026-11-11', TODAY, [noon, allDay], [anytime, morning], [task]);
   assert.deepEqual(
@@ -30,7 +30,7 @@ test('ordem do dia: dia inteiro, itens com horário misturados, hábitos sem hor
 });
 
 test('evento vinculado a hábito existente não duplica; vinculado a hábito apagado aparece', () => {
-  const h = makeHabit({ id: 'h1', time: '09:00' });
+  const h = makeHabit({ id: 'h1', time: '09:00', startDate: '2026-01-01' });
   const linked = ev({ id: 'x', linkedHabitId: 'h1', start: '09:00' });
   const orphan = ev({ id: 'y', linkedHabitId: 'apagado', start: '15:00' });
   const items = dayItems('2026-11-11', TODAY, [linked, orphan], [h], []);

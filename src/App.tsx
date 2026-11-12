@@ -4,7 +4,7 @@ import { HabitForm } from './components/HabitForm';
 import { Icon, type IconName } from './components/Icon';
 import { Sheet } from './components/Sheet';
 import { TaskForm } from './components/TaskForm';
-import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher } from './hooks';
+import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
 import { AgendaScreen } from './screens/AgendaScreen';
 import { CategoriesScreen } from './screens/CategoriesScreen';
 import { HabitDetail, type DetailTab } from './screens/HabitDetail';
@@ -32,6 +32,7 @@ export default function App() {
   const state = useAppState();
   useTimerWatcher();
   useReminders();
+  useTokenRenewal();
   useAutoSync();
   useAutoDriveSync();
 
