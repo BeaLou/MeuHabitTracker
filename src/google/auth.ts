@@ -84,6 +84,8 @@ function saveToken(t: StoredToken | null) {
 }
 
 let client: TokenClient | null = null;
+/** Depois de uma renovação silenciosa que falhou, para de tentar até o usuário reconectar com um clique. */
+let needsReconnect = false;
 
 /** Milissegundos até o token atual expirar (0 se não há token válido). */
 export function tokenMsLeft(): number {
@@ -96,7 +98,7 @@ export function tokenMsLeft(): number {
  * no Google no navegador e já autorizou o app; se não der, falha em silêncio e o fluxo normal segue.
  */
 export async function renewTokenSilently(): Promise<boolean> {
-  if (!googleConfigured) return false;
+  if (!googleConfigured || needsReconnect) return false;
   try {
     await loadScript();
     const api = gis();
@@ -106,11 +108,12 @@ export async function renewTokenSilently(): Promise<boolean> {
       const timer = setTimeout(() => resolve(false), 15_000);
       client.callback = (r) => {
         clearTimeout(timer);
-        if (r.error || !r.access_token) return resolve(false);
+        if (r.error || !r.access_token) { needsReconnect = true; return resolve(false); }
         saveToken({ value: r.access_token, expiresAt: Date.now() + (r.expires_in ?? 3600) * 1000 });
+        needsReconnect = false;
         resolve(true);
       };
-      client.error_callback = () => { clearTimeout(timer); resolve(false); };
+      client.error_callback = () => { clearTimeout(timer); needsReconnect = true; resolve(false); };
       client.requestAccessToken({ prompt: 'none' });
     });
   } catch {
@@ -126,6 +129,13 @@ export async function getAccessToken(interactive = false): Promise<string> {
   if (!googleConfigured) throw new Error('Defina VITE_GOOGLE_CLIENT_ID para usar o Google Agenda (veja o README).');
   const cached = readToken();
   if (cached) return cached.value;
+
+  // Sem clique do usuário nunca abrimos popup: tenta renovar em silêncio e, se não der, pede para reconectar.
+  if (!interactive) {
+    if (!needsReconnect && (await renewTokenSilently())) return readToken()!.value;
+    needsReconnect = true;
+    throw new Error('Sessão do Google expirada: toque em Sincronizar para reconectar.');
+  }
 
   await loadScript();
   const api = gis();
@@ -143,12 +153,13 @@ export async function getAccessToken(interactive = false): Promise<string> {
         return;
       }
       saveToken({ value: r.access_token, expiresAt: Date.now() + (r.expires_in ?? 3600) * 1000 });
+      needsReconnect = false;
       resolve(r.access_token);
     };
     client.error_callback = (e) => {
       reject(new Error(e.type === 'popup_closed' ? 'Login cancelado.' : `Login do Google falhou (${e.type}).`));
     };
-    client.requestAccessToken({ prompt: interactive ? 'consent' : '' });
+    client.requestAccessToken({ prompt: '' });
   });
 }
 
