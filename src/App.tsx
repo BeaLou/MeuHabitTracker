@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { addHabit, addTask, removeTask, updateTask } from './actions';
 import { HabitForm } from './components/HabitForm';
 import { Icon, type IconName } from './components/Icon';
+import { ChallengeScreen } from './screens/ChallengeScreen';
 import { Sheet } from './components/Sheet';
 import { TaskForm } from './components/TaskForm';
 import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
@@ -38,6 +39,7 @@ export default function App() {
 
   const [tab, setTab] = useState<Tab>('today');
   const [detail, setDetail] = useState<{ id: string; tab: DetailTab } | null>(null);
+  const [challenge, setChallenge] = useState(false);
   const [settings, setSettings] = useState(false);
   const [sheet, setSheet] = useState<SheetKind>(null);
   const [editTask, setEditTask] = useState<string | null>(null);
@@ -62,7 +64,7 @@ export default function App() {
           <AgendaScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} />
         )}
         {tab === 'habits' && (
-          <HabitsScreen state={state} onOpenHabit={(id, t) => setDetail({ id, tab: t })} onNewHabit={() => setSheet('habit')} />
+          <HabitsScreen state={state} onOpenHabit={(id, t) => setDetail({ id, tab: t })} onNewHabit={() => setSheet('habit')} onOpenChallenge={() => setChallenge(true)} />
         )}
         {tab === 'tasks' && <TasksScreen state={state} onEditTask={setEditTask} />}
         {tab === 'categories' && <CategoriesScreen state={state} />}
@@ -82,6 +84,7 @@ export default function App() {
         ))}
       </nav>
 
+      {challenge && <ChallengeScreen state={state} onBack={() => setChallenge(false)} onOpenHabit={(id) => setDetail({ id, tab: 'edit' })} />}
       {detail && <HabitDetail state={state} habitId={detail.id} initialTab={detail.tab} onBack={closeDetail} />}
       {settings && <SettingsScreen state={state} onBack={() => setSettings(false)} />}
 

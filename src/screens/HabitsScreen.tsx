@@ -7,9 +7,10 @@ interface Props {
   state: AppState;
   onOpenHabit: (id: string, tab: 'calendar' | 'stats' | 'edit') => void;
   onNewHabit: () => void;
+  onOpenChallenge: () => void;
 }
 
-export function HabitsScreen({ state, onOpenHabit, onNewHabit }: Props) {
+export function HabitsScreen({ state, onOpenHabit, onNewHabit, onOpenChallenge }: Props) {
   const today = todayKey();
   const [cat, setCat] = useState('all');
   const [showArchived, setShowArchived] = useState(false);
@@ -21,6 +22,7 @@ export function HabitsScreen({ state, onOpenHabit, onNewHabit }: Props) {
 
   return (
     <div>
+      <button className="challenge-entry" onClick={onOpenChallenge}>🌸 Desafio 75 <span>Abrir ›</span></button>
       <div className="chips">
         <button className={`chip${cat === 'all' ? ' on' : ''}`} onClick={() => setCat('all')}>Tudo</button>
         {state.categories.map((c) => (
