@@ -1,3 +1,4 @@
+import { challengeHabits } from './core/challenge';
 import { todayKey, type DateKey } from './core/dates';
 import { createInitialState, exampleHabits, makeHabit, makeTask, newId } from './core/defaults';
 import { nextStatus } from './core/habits';
@@ -68,6 +69,14 @@ export function setNote(id: string, key: DateKey, text: string) {
 
 export function addExamples() {
   store.update((s) => ({ ...s, habits: [...s.habits, ...exampleHabits()] }));
+}
+
+export function addChallenge(startDate: DateKey) {
+  store.update((s) => ({ ...s, habits: [...s.habits, ...challengeHabits(startDate)] }));
+}
+
+export function endChallenge(ids: string[]) {
+  for (const id of ids) updateHabit(id, { archived: true });
 }
 
 /* ---------- tarefas ---------- */

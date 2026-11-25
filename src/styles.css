@@ -165,6 +165,19 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .event time { color: var(--muted); font-size: 12px; min-width: 44px; }
 .toast { position: absolute; left: 16px; right: 16px; bottom: 90px; background: var(--surface-2); border: 1px solid var(--line); padding: 12px 14px; border-radius: 14px; z-index: 40; }
 
+/* ---- Desafio 75 (tema rosa) ---- */
+.challenge-entry { display: flex; justify-content: space-between; width: 100%; padding: 14px; margin-bottom: 8px; border-radius: var(--radius); background: rgba(244, 114, 176, 0.16); border: 1px solid #f472b0; color: #ffc2dd; font-weight: 600; }
+.challenge { --accent: #f472b0; --accent-soft: rgba(244, 114, 176, 0.18); --green: #f472b0; --bg: #1c0f16; --surface-2: #2a1721; --line: #4a2b3b; }
+.challenge .btn { color: #1c0f16; }
+.challenge .btn.ghost { color: var(--text); }
+.challenge progress { width: 100%; accent-color: var(--accent); }
+.challenge .check:disabled { opacity: 0.35; cursor: default; }
+.c-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; margin-top: 8px; }
+.c-grid button { aspect-ratio: 1; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; }
+.c-grid .part { background: #7a2f55; }
+.c-grid .full { background: var(--accent); color: #1c0f16; font-weight: 700; }
+.c-grid .sel { outline: 2px solid #fff; }
+
 /* ---------- desktop / telas largas ---------- */
 
 /* ---- Agenda (calendário mensal) ---- */

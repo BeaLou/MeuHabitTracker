@@ -41,6 +41,8 @@ export interface Habit {
   notes: Record<DateKey, string>;
   notesAt?: Record<DateKey, number>;
   gcal: CalendarLink | null;
+  /** Presente nos hábitos criados pelo Desafio 75; hábitos com o mesmo id formam um desafio. */
+  challenge?: { id: string; order: number };
   createdAt: number;
   updatedAt: number;
 }
