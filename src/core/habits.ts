@@ -110,4 +110,20 @@ export function daysSinceStart(h: Habit, today: DateKey): number {
   return Math.max(0, diffDays(h.startDate, today));
 }
 
+export type Period = 'morning' | 'afternoon' | 'evening' | 'anytime';
+
+export const PERIODS: { id: Period; label: string }[] = [
+  { id: 'morning', label: 'Manhã' },
+  { id: 'afternoon', label: 'Tarde' },
+  { id: 'evening', label: 'Noite' },
+  { id: 'anytime', label: 'Sem horário' },
+];
+
+/** Período do dia a partir do horário "HH:mm": manhã até 11:59, tarde até 17:59, depois noite. */
+export function periodOf(time: string | null): Period {
+  if (!time) return 'anytime';
+  if (time < '12:00') return 'morning';
+  return time < '18:00' ? 'afternoon' : 'evening';
+}
+
 export const diasLabel = (n: number): string => `${n} ${n === 1 ? 'dia' : 'dias'}`;
