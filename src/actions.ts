@@ -2,7 +2,9 @@ import { challengeHabits } from './core/challenge';
 import { todayKey, type DateKey } from './core/dates';
 import { createInitialState, exampleHabits, makeHabit, makeTask, newId } from './core/defaults';
 import { nextStatus } from './core/habits';
-import type { AppState, Category, DayStatus, Expense, Habit, Task } from './core/types';
+import type { BookInfo } from './core/books';
+import { percentOf } from './core/progress';
+import type { AppState, BookStatus, Category, DayStatus, Expense, Habit, ProgressEntry, Task } from './core/types';
 import { store } from './store';
 
 const touch = <T extends { updatedAt: number }>(x: T, patch: Partial<T>): T => ({ ...x, ...patch, updatedAt: Date.now() });
@@ -118,6 +120,43 @@ export function removeExpense(id: string) {
   store.update((s) => ({ ...s, expenses: s.expenses.filter((e) => e.id !== id), tombstones: { ...s.tombstones, [id]: Date.now() } }));
 }
 
+/* ---------- livros ---------- */
+
+export function addBook(info: BookInfo, status: BookStatus) {
+  const now = Date.now();
+  store.update((s) => ({ ...s, books: [...s.books, { ...info, status, id: newId(), createdAt: now, updatedAt: now }] }));
+}
+
+export function setBookStatus(id: string, status: BookStatus) {
+  store.update((s) => ({ ...s, books: s.books.map((b) => (b.id === id ? touch(b, { status }) : b)) }));
+}
+
+export function removeBook(id: string) {
+  store.update((s) => ({ ...s, books: s.books.filter((b) => b.id !== id), tombstones: { ...s.tombstones, [id]: Date.now() } }));
+}
+
+export function addProgress(bookId: string, input: Omit<ProgressEntry, 'id'>) {
+  const entry = { ...input, id: newId() };
+  store.update((s) => ({
+    ...s,
+    books: s.books.map((b) => {
+      if (b.id !== bookId) return b;
+      const progress = [...(b.progress ?? []), entry];
+      // registrar leitura tira de "Quero ler"; chegar ao fim marca como lido
+      const status: BookStatus = percentOf(entry) === 100 ? 'read' : b.status === 'want' ? 'reading' : b.status;
+      return touch(b, { progress, status });
+    }),
+  }));
+}
+
+export function removeProgress(bookId: string, entryId: string) {
+  store.update((s) => ({
+    ...s,
+    books: s.books.map((b) => (b.id === bookId ? touch(b, { progress: (b.progress ?? []).filter((e) => e.id !== entryId) }) : b)),
+    tombstones: { ...s.tombstones, [entryId]: Date.now() },
+  }));
+}
+
 /* ---------- categorias ---------- */
 
 export function addCategory(input: Omit<Category, 'id'>): Category {
@@ -209,9 +248,9 @@ export function importJson(text: string): void {
   const now = Date.now();
   store.update((cur) => {
     // o que existe hoje e não está no backup vira "excluído", para o sync com o Drive não trazer de volta
-    const keep = new Set([...parsed.habits!, ...parsed.tasks!, ...(parsed.expenses ?? [])].map((x) => x.id));
+    const keep = new Set([...parsed.habits!, ...parsed.tasks!, ...(parsed.expenses ?? []), ...(parsed.books ?? [])].map((x) => x.id));
     const tombstones = { ...cur.tombstones, ...(parsed.tombstones ?? {}) };
-    for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses]) if (!keep.has(x.id)) tombstones[x.id] = now;
+    for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses, ...cur.books]) if (!keep.has(x.id)) tombstones[x.id] = now;
     return {
       ...initial,
       ...parsed,
@@ -231,7 +270,7 @@ export function resetAll() {
   store.update((cur) => {
     const initial = createInitialState();
     const tombstones = { ...cur.tombstones };
-    for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses]) tombstones[x.id] = now;
+    for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses, ...cur.books]) tombstones[x.id] = now;
     return {
       ...initial,
       categories: initial.categories.map((c) => ({ ...c, updatedAt: now })),

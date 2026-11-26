@@ -65,6 +65,7 @@ const normalize = (d: Partial<AppState>) =>
     habits: d.habits ?? [],
     tasks: d.tasks ?? [],
     expenses: d.expenses ?? [],
+    books: d.books ?? [],
     categories: d.categories ?? [],
     sessions: d.sessions ?? [],
     tombstones: d.tombstones ?? {},
