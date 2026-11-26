@@ -7,7 +7,7 @@ import { Icon, type IconName } from './components/Icon';
 import { ChallengeScreen } from './screens/ChallengeScreen';
 import { Sheet } from './components/Sheet';
 import { TaskForm } from './components/TaskForm';
-import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
+import { useAutoDriveSync, useAutoSync, usePorOShape, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
 import { AgendaScreen } from './screens/AgendaScreen';
 import { HabitDetail, type DetailTab } from './screens/HabitDetail';
 import { BooksScreen } from './screens/BooksScreen';
@@ -47,6 +47,7 @@ export default function App() {
   useTokenRenewal();
   useAutoSync();
   useAutoDriveSync();
+  usePorOShape();
 
   const [tab, setTab] = useState<Tab>('today');
   const [detail, setDetail] = useState<{ id: string; tab: DetailTab } | null>(null);

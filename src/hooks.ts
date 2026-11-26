@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { finishTimer, setGoogleState } from './actions';
+import { finishTimer, setGoogleState, syncPorOShape } from './actions';
+import { readPorOShape } from './poroshape';
 import { nowTimeKey, timeToMinutes, todayKey } from './core/dates';
 import { cellStatus, isDue } from './core/habits';
 import { shareSignature } from './core/merge';
@@ -9,6 +10,25 @@ import { driveSyncNow } from './google/drive';
 import { syncNow } from './google/sync';
 import { notify } from './notify';
 import { store, useAppState } from './store';
+
+/** Traz o que foi feito no Por o Shape: ao abrir, ao voltar para o app e ao mudar um vínculo. */
+export function usePorOShape() {
+  const links = useAppState().habits.filter((h) => h.link && !h.archived).map((h) => `${h.id}:${h.link}:${h.startDate}:${h.goal?.target ?? 0}`).join('|');
+  useEffect(() => {
+    if (!links) return;
+    const pull = () => {
+      if (document.visibilityState !== 'visible') return;
+      void readPorOShape().then((records) => { if (records) syncPorOShape(records); });
+    };
+    pull();
+    document.addEventListener('visibilitychange', pull);
+    window.addEventListener('focus', pull);
+    return () => {
+      document.removeEventListener('visibilitychange', pull);
+      window.removeEventListener('focus', pull);
+    };
+  }, [links]);
+}
 
 /** true enquanto a media query casar (ex.: tela larga). */
 export function useMediaQuery(query: string): boolean {
