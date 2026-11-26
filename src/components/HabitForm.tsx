@@ -160,8 +160,8 @@ export function HabitForm({ initial, categories, googleConnected, submitLabel, o
           <input id="h-sync" type="checkbox" checked={d.syncToCalendar && canSync} disabled={!canSync} onChange={(e) => set('syncToCalendar', e.target.checked)} />
           Sincronizar com o Google Agenda
         </label>
-        {!googleConfigured && <span className="hint">Configure o Google nos Ajustes (⚙) para ativar.</span>}
-        {googleConfigured && !googleConnected && <span className="hint">Conecte sua conta do Google nos Ajustes (⚙).</span>}
+        {!googleConfigured && <span className="hint">Configure o Google em Mais → Ajustes para ativar.</span>}
+        {googleConfigured && !googleConnected && <span className="hint">Conecte sua conta do Google em Mais → Ajustes.</span>}
         {googleConnected && !d.time && <span className="hint">Defina um horário para aparecer na agenda.</span>}
       </div>
 

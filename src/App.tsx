@@ -67,7 +67,6 @@ export default function App() {
       <div className="topbar">
         {inMore && <button className="icon-btn" onClick={() => setTab('more')} aria-label="Voltar"><Icon name="back" /></button>}
         <h1>{title}</h1>
-        <button className="icon-btn" onClick={() => setSettings(true)} aria-label="Ajustes"><Icon name="gear" /></button>
       </div>
 
       <main className="screen">
@@ -93,6 +92,11 @@ export default function App() {
                 <Icon name="next" />
               </button>
             ))}
+            <button className="row" style={{ width: '100%' }} onClick={() => setSettings(true)}>
+              <span className="ico"><Icon name="gear" /></span>
+              <span className="main title">Ajustes</span>
+              <Icon name="next" />
+            </button>
           </div>
         )}
       </main>

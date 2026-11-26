@@ -77,7 +77,7 @@ export function AgendaScreen({ state, onOpenHabit, onEditTask }: Props) {
       </div>
 
       {!connected && (
-        <p className="hint">Conecte o Google em Ajustes para ver também os eventos da sua agenda aqui. Seus hábitos e tarefas já aparecem.</p>
+        <p className="hint">Conecte o Google em Mais → Ajustes para ver também os eventos da sua agenda aqui. Seus hábitos e tarefas já aparecem.</p>
       )}
       {error && <p className="warn">{error}</p>}
 
