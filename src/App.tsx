@@ -50,7 +50,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="topbar">
-        <h1>{TABS.find((t) => t.id === tab)!.label}</h1>
+        <h1>{tab === 'today' ? 'Oi, Bea' : TABS.find((t) => t.id === tab)!.label}</h1>
         <button className="icon-btn" onClick={() => setSettings(true)} aria-label="Ajustes"><Icon name="gear" /></button>
       </div>
 
