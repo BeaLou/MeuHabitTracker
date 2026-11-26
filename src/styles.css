@@ -254,3 +254,16 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
   .mchip i { display: inline; }
   .mgrid .wd { font-size: 12px; }
 }
+
+/* ---------- visual mais limpo ---------- */
+.greet { margin-bottom: 16px; }
+.challenge-entry { border: 0; padding: 12px 14px; }
+.challenge-entry .top { font-size: 14px; }
+.challenge-entry .bar { height: 4px; }
+.chip { background: transparent; font-size: 13px; padding: 5px 12px; border-radius: 99px; }
+.chip.on { border-color: transparent; }
+.row { border-bottom: 0; padding: 10px 0; }
+.row .ico { background: transparent !important; }
+.sub:empty { display: none; }
+.bottom-nav { background: var(--bg); }
+.fab { box-shadow: none; }

@@ -66,10 +66,9 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
     <div>
       <div className="greet">
         <div>
-          <h2>Oi, Bea</h2>
           <p className="hint">{dueToday.length ? `${doneToday} de ${dueToday.length} hábitos de hoje` : 'Nenhum hábito para hoje'}</p>
         </div>
-        <ScoreRing value={progress} size={68} stroke={7} label="Progresso de hoje, em %" />
+        <ScoreRing value={progress} size={52} stroke={5} label="Progresso de hoje, em %" />
       </div>
       <ChallengeCard habits={state.habits} onOpen={onOpenChallenge} />
       <div className="week">
@@ -85,18 +84,17 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
         <button className="icon-btn" aria-label="Próxima semana" onClick={() => setSelected(addDays(selected, 7))}><Icon name="next" /></button>
       </div>
 
-      <div className="chips">
+      {!empty && <div className="chips">
         <button className={`chip${cat === 'all' ? ' on' : ''}`} onClick={() => setCat('all')}>Tudo</button>
         {state.categories.map((c) => (
-          <button key={c.id} className={`chip${cat === c.id ? ' on' : ''}`} onClick={() => setCat(c.id)}>{c.emoji} {c.name}</button>
+          <button key={c.id} className={`chip${cat === c.id ? ' on' : ''}`} onClick={() => setCat(c.id)}>{c.name}</button>
         ))}
-      </div>
+      </div>}
 
       {empty && (
         <div className="empty">
           <Icon name="search" />
           <p className="lead">Nenhuma pista por aqui ainda.</p>
-          <p>Nenhum hábito ainda. Crie o primeiro ou comece com alguns exemplos.</p>
           <div className="btns" style={{ width: '100%' }}>
             <button className="btn" onClick={onNewHabit}>Criar hábito</button>
             <button className="btn ghost" onClick={addExamples}>Adicionar exemplos</button>
@@ -113,7 +111,6 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
             <button className="main" onClick={() => onOpenHabit(h.id)}>
               <div className="title">{h.name}</div>
               <div className="sub">
-                <span className="tag" style={{ color: c?.color }}>Hábito</span>
                 {h.time && <span><Icon name="timer" /> {h.time}</span>}
                 {h.gcal && <span aria-label="Na agenda"><Icon name="calendar" /></span>}
               </div>
