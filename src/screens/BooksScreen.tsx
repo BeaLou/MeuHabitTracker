@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { addBook, removeBook, setBookStatus } from '../actions';
+import { addBook, removeBook, setBookStatus, updateBook } from '../actions';
 import { BOOK_STATUS, searchBooks, type BookInfo } from '../core/books';
 import type { AppState, BookStatus } from '../core/types';
 import { ProgressSheet } from '../components/ProgressSheet';
 import { latestProgress, percentOf } from '../core/progress';
+import { BooksOverview } from '../components/BooksOverview';
+import { finishedOn } from '../core/reading';
 import { Icon } from '../components/Icon';
 
 const meta = (b: BookInfo) => [b.authors, b.year].filter(Boolean).join(' · ');
@@ -13,6 +15,8 @@ const same = (a: BookInfo, b: BookInfo) =>
 function Cover({ url }: { url: string | null }) {
   return url ? <img className="cover" src={url} alt="" loading="lazy" /> : <span className="cover" />;
 }
+
+const RATINGS = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1, 0.5];
 
 export function BooksScreen({ state }: { state: AppState }) {
   const [status, setStatus] = useState<BookStatus>('want');
@@ -58,7 +62,10 @@ export function BooksScreen({ state }: { state: AppState }) {
         <button className="btn small" type="submit" disabled={busy || !query.trim()}>{busy ? 'Buscando…' : 'Buscar'}</button>
       </form>
 
-      <div className="tabs" role="tablist" style={{ marginTop: 8 }}>
+      {!results && !error && <BooksOverview state={state} onUpdateProgress={setOpenId} />}
+
+      <h2 className="period">Estante</h2>
+      <div className="tabs" role="tablist">
         {BOOK_STATUS.map((s) => (
           <button key={s.id} role="tab" aria-selected={status === s.id} className={status === s.id ? 'on' : ''} onClick={() => setStatus(s.id)}>
             {s.label} ({state.books.filter((b) => b.status === s.id).length})
@@ -106,6 +113,15 @@ export function BooksScreen({ state }: { state: AppState }) {
                 <select className="book-status" value={b.status} onChange={(e) => setBookStatus(b.id, e.target.value as BookStatus)} aria-label={`Situação de ${b.title}`}>
                   {BOOK_STATUS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </select>
+                {b.status === 'read' && (
+                  <div className="read-info">
+                    <select value={b.rating ?? ''} onChange={(e) => updateBook(b.id, { rating: e.target.value ? Number(e.target.value) : undefined })} aria-label={`Nota de ${b.title}`}>
+                      <option value="">Sem nota</option>
+                      {RATINGS.map((n) => <option key={n} value={n}>★ {n.toLocaleString('pt-BR')}</option>)}
+                    </select>
+                    <label>Terminei em <input type="date" value={finishedOn(b)} onChange={(e) => updateBook(b.id, { finishedAt: e.target.value })} /></label>
+                  </div>
+                )}
               </div>
               <button className="icon-btn" aria-label={`Excluir ${b.title}`} onClick={() => { if (window.confirm(`Excluir "${b.title}"?`)) removeBook(b.id); }}>
                 <Icon name="trash" />

@@ -16,10 +16,11 @@ import { HabitsScreen } from './screens/HabitsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TimerScreen } from './screens/TimerScreen';
+import { WeekScreen } from './screens/WeekScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { useAppState } from './store';
 
-type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'more' | 'books' | 'expenses' | 'timer';
+type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'more' | 'week' | 'books' | 'expenses' | 'timer';
 
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'today', label: 'Hoje', icon: 'today' },
@@ -31,6 +32,7 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
 
 /** Telas abertas pelo menu Mais. */
 const MORE: { id: Tab; label: string; icon: IconName }[] = [
+  { id: 'week', label: 'Semana', icon: 'chart' },
   { id: 'books', label: 'Livros', icon: 'book' },
   { id: 'expenses', label: 'Gastos', icon: 'wallet' },
   { id: 'timer', label: 'Timer', icon: 'timer' },
@@ -85,6 +87,7 @@ export default function App() {
         )}
         {tab === 'tasks' && <TasksScreen state={state} onEditTask={setEditTask} />}
         {tab === 'timer' && <TimerScreen state={state} />}
+        {tab === 'week' && <WeekScreen state={state} />}
         {tab === 'books' && <BooksScreen state={state} />}
         {tab === 'expenses' && <ExpensesScreen state={state} onEdit={setEditExpense} />}
         {tab === 'more' && (

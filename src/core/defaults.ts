@@ -74,6 +74,7 @@ export function createInitialState(): AppState {
     tasks: [],
     expenses: [],
     books: [],
+    targets: [],
     categories: DEFAULT_CATEGORIES.map((c) => ({ ...c })),
     sessions: [],
     timer: { status: 'idle', totalSec: 25 * 60, endsAt: null, remainingSec: null, habitId: null, markDoneOnFinish: true },
