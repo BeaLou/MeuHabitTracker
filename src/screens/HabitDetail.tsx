@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { cycleDay, removeHabit, setDayStatus, setNote, updateHabit } from '../actions';
 import { addMonths, formatLong, fromKey, todayKey } from '../core/dates';
-import { computeStats, diasLabel } from '../core/habits';
+import { computeStats, streakLabel } from '../core/habits';
 import type { AppState } from '../core/types';
 import { Icon } from '../components/Icon';
+import { habitLevel } from '../core/heatmap';
+import { Heatmap } from '../components/Heatmap';
 import { HabitForm } from '../components/HabitForm';
 import { MonthCalendar } from '../components/MonthCalendar';
 import { ScoreRing } from '../components/ScoreRing';
@@ -61,8 +63,8 @@ export function HabitDetail({ state, habitId, initialTab, onBack }: Props) {
             />
             <div className="section-title">Série</div>
             <div className="two">
-              <div><small>Atual</small><strong>{diasLabel(stats.currentStreak)}</strong></div>
-              <div><small>Melhor</small><strong>{diasLabel(stats.bestStreak)}</strong></div>
+              <div><small>Atual</small><strong>{streakLabel(habit, stats.currentStreak)}</strong></div>
+              <div><small>Melhor</small><strong>{streakLabel(habit, stats.bestStreak)}</strong></div>
             </div>
             <div className="section-title">Anotações · {formatLong(selected)}</div>
             <textarea
@@ -80,9 +82,11 @@ export function HabitDetail({ state, habitId, initialTab, onBack }: Props) {
             <div className="section-title" style={{ textAlign: 'center' }}>Pontuação do hábito</div>
             <div className="ring-wrap"><ScoreRing value={stats.score} label="Pontuação" /></div>
             <div className="two">
-              <div><small>Série atual</small><strong>{diasLabel(stats.currentStreak)}</strong></div>
-              <div><small>Melhor série</small><strong>{diasLabel(stats.bestStreak)}</strong></div>
+              <div><small>Série atual</small><strong>{streakLabel(habit, stats.currentStreak)}</strong></div>
+              <div><small>Melhor série</small><strong>{streakLabel(habit, stats.bestStreak)}</strong></div>
             </div>
+            <div className="section-title">Constância</div>
+            <Heatmap today={today} level={(k) => habitLevel(habit, k)} />
             <div className="section-title">Vezes concluída</div>
             <div className="kv"><span>Esta semana</span><b>{stats.doneWeek}</b></div>
             <div className="kv"><span>Este mês</span><b>{stats.doneMonth}</b></div>

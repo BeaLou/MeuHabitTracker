@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { todayKey } from '../core/dates';
 import type { AppState } from '../core/types';
+import { overallLevel } from '../core/heatmap';
+import { Heatmap } from '../components/Heatmap';
 import { ChallengeCard } from '../components/ChallengeCard';
 import { Icon } from '../components/Icon';
 import { HabitCard } from '../components/HabitCard';
@@ -31,6 +33,13 @@ export function HabitsScreen({ state, onOpenHabit, onNewHabit, onOpenChallenge }
           <button key={c.id} className={`chip${cat === c.id ? ' on' : ''}`} onClick={() => setCat(c.id)}>{c.emoji} {c.name}</button>
         ))}
       </div>
+
+      {active.length > 0 && (
+        <section className="consistency" aria-label="Constância">
+          <h2 className="period">Constância</h2>
+          <Heatmap today={today} level={(k) => overallLevel(active, k)} />
+        </section>
+      )}
 
       {active.length === 0 && (
         <div className="empty">

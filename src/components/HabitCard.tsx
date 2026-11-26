@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { cycleDay, removeHabit, updateHabit } from '../actions';
 import { WEEKDAY_SHORT, dayNumber, fromKey, type DateKey } from '../core/dates';
-import { cellStatus, computeStats, frequencyLabel, lastSevenDays } from '../core/habits';
+import { cellStatus, computeStats, habitFrequencyLabel, lastSevenDays, streakLabel } from '../core/habits';
 import type { Category, Habit } from '../core/types';
 import { Icon } from './Icon';
 
@@ -24,7 +24,8 @@ export function HabitCard({ habit, category, today, onOpen }: Props) {
           <h3>{habit.emoji} {habit.name}</h3>
           <div className="sub" style={{ marginTop: 4 }}>
             {category && <span className="tag" style={{ color: category.color }}>{category.name}</span>}
-            <span>{frequencyLabel(habit.frequency)}</span>
+            <span>{habitFrequencyLabel(habit)}</span>
+            {habit.goal && <span>{habit.goal.target} {habit.goal.unit} por dia</span>}
             {habit.time && <span>⏰ {habit.time}</span>}
             {habit.gcal && <span title="Sincronizado com o Google Agenda">📅</span>}
           </div>
@@ -67,7 +68,7 @@ export function HabitCard({ habit, category, today, onOpen }: Props) {
       </div>
 
       <div className="foot">
-        <span className="stat" title="Sequência atual"><Icon name="flame" /> {stats.currentStreak}</span>
+        <span className="stat" title="Sequência atual"><Icon name="flame" /> {habit.weeklyTimes ? streakLabel(habit, stats.currentStreak) : stats.currentStreak}</span>
         <span className="stat" title="Taxa de conclusão"><Icon name="check" /> {stats.rate}%</span>
         <span className="spacer" />
         <button className="icon-btn" aria-label="Calendário" onClick={() => onOpen('calendar')}><Icon name="calendar" /></button>

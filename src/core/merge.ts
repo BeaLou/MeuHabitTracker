@@ -62,8 +62,10 @@ export function mergeStates(local: AppState, remote: Partial<AppState>, now = Da
   const habits = mergeById(local.habits, remote.habits ?? [], tombs, (win, lose) => {
     const log = mergeMap(win.log, win.logAt, lose.log, lose.logAt);
     const notes = mergeMap(win.notes, win.notesAt, lose.notes, lose.notesAt);
+    const amounts = mergeMap(win.amounts ?? {}, win.amountsAt, lose.amounts ?? {}, lose.amountsAt);
     const nonEmpty = (m: Record<string, number>) => (Object.keys(m).length ? m : undefined);
-    return { ...win, log: log.value, logAt: nonEmpty(log.at), notes: notes.value, notesAt: nonEmpty(notes.at), gcal: win.gcal ?? lose.gcal };
+    const merged = Object.keys(amounts.at).length ? { amounts: amounts.value, amountsAt: nonEmpty(amounts.at) } : {};
+    return { ...win, ...merged, log: log.value, logAt: nonEmpty(log.at), notes: notes.value, notesAt: nonEmpty(notes.at), gcal: win.gcal ?? lose.gcal };
   });
   const tasks = mergeById(local.tasks, remote.tasks ?? [], tombs);
   const categories = mergeById(local.categories, remote.categories ?? [], tombs);
@@ -120,7 +122,8 @@ export function shareSignature(s: AppState): string {
   const h = s.habits.map((x) => {
     const at = x.logAt ? Object.values(x.logAt) : [];
     const na = x.notesAt ? Object.values(x.notesAt) : [];
-    return `${x.id}:${x.updatedAt}:${at.length}:${at.length ? Math.max(...at) : 0}:${na.length ? Math.max(...na) : 0}`;
+    const am = x.amountsAt ? Math.max(0, ...Object.values(x.amountsAt)) : 0;
+    return `${x.id}:${x.updatedAt}:${am}:${at.length}:${at.length ? Math.max(...at) : 0}:${na.length ? Math.max(...na) : 0}`;
   });
   const t = s.tasks.map((x) => `${x.id}:${x.updatedAt}`);
   const c = s.categories.map((x) => `${x.id}:${x.updatedAt ?? 0}`);

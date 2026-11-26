@@ -26,6 +26,13 @@ export interface Habit {
   /** Maior = mais importante. */
   priority: number;
   frequency: Frequency;
+  /** Meta "N vezes por semana", em quaisquer dias. Usada com frequency 'daily', que é o que versões antigas do app enxergam. */
+  weeklyTimes?: number;
+  /** Meta diária em quantidade (ex.: 8 copos). Cada toque soma `step`. */
+  goal?: { target: number; unit: string; step: number };
+  /** Quantidade registrada em cada dia, para hábitos com `goal`. */
+  amounts?: Record<DateKey, number>;
+  amountsAt?: Record<DateKey, number>;
   startDate: DateKey;
   targetDate: DateKey | null;
   /** "HH:mm" — necessário para sincronizar com a agenda. */
