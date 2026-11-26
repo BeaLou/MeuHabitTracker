@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addExamples, cycleDay, toggleTask } from '../actions';
 import { WEEKDAY_SHORT, addDays, dayNumber, fromKey, startOfWeek, todayKey, formatLong } from '../core/dates';
-import { cellStatus, isDue } from '../core/habits';
+import { PERIODS, cellStatus, isDue, periodOf } from '../core/habits';
 import type { AppState } from '../core/types';
 import { ChallengeCard } from '../components/ChallengeCard';
-import { ScoreRing } from '../components/ScoreRing';
+import { latestProgress, percentOf } from '../core/progress';
 import { Icon } from '../components/Icon';
 import { listDayEvents, type DayEvent } from '../google/sync';
 
@@ -14,9 +14,11 @@ interface Props {
   onEditTask: (id: string) => void;
   onNewHabit: () => void;
   onOpenChallenge: () => void;
+  onOpenBooks: () => void;
+  onNewExpense: () => void;
 }
 
-export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpenChallenge }: Props) {
+export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpenChallenge, onOpenBooks, onNewExpense }: Props) {
   const today = todayKey();
   const [selected, setSelected] = useState(today);
   const [cat, setCat] = useState<string>('all');
@@ -45,6 +47,9 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
   const doneToday = dueToday.filter((h) => h.log[today] === 'done').length;
   const progress = dueToday.length ? Math.round((doneToday / dueToday.length) * 100) : 0;
 
+  const reading = state.books.filter((b) => b.status === 'reading').sort((a, b) => b.updatedAt - a.updatedAt)[0];
+  const readingEntry = reading ? latestProgress(reading) : undefined;
+
   const connected = state.google.connected;
   useEffect(() => {
     if (!connected) {
@@ -64,11 +69,14 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
 
   return (
     <div>
-      <div className="greet">
-        <div>
-          <p className="hint">{dueToday.length ? `${doneToday} de ${dueToday.length} hábitos de hoje` : 'Nenhum hábito para hoje'}</p>
+      <div className="day-card">
+        <div className="top">
+          <b>{dueToday.length ? `${doneToday} de ${dueToday.length} hábitos de hoje` : 'Nenhum hábito para hoje'}</b>
+          {dueToday.length > 0 && <span>{progress}%</span>}
         </div>
-        <ScoreRing value={progress} size={52} stroke={5} label="Progresso de hoje, em %" />
+        <div className="meter" role="progressbar" aria-label="Progresso de hoje" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+          <i style={{ width: `${progress}%` }} />
+        </div>
       </div>
       <ChallengeCard habits={state.habits} onOpen={onOpenChallenge} />
       <div className="week">
@@ -102,7 +110,13 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
         </div>
       )}
 
-      {habits.map((h) => {
+      {PERIODS.map((period) => {
+        const group = habits.filter((h) => periodOf(h.time) === period.id);
+        if (!group.length) return null;
+        return (
+          <section key={period.id} aria-label={period.label}>
+            <h2 className="period">{period.label}</h2>
+            {group.map((h) => {
         const st = cellStatus(h, selected, today);
         const c = catById.get(h.categoryId);
         return (
@@ -126,8 +140,12 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
             </button>
           </div>
         );
+            })}
+          </section>
+        );
       })}
 
+      {tasks.length > 0 && <h2 className="period">Tarefas</h2>}
       {tasks.map((t) => {
         const c = catById.get(t.categoryId);
         const overdue = !t.done && t.dueDate !== null && t.dueDate < today;
@@ -149,6 +167,15 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
       })}
 
       {!empty && habits.length === 0 && tasks.length === 0 && <p className="hint" style={{ textAlign: 'center', padding: 24 }}>Nada previsto para este dia.</p>}
+
+      <div className="shortcuts">
+        <button className="reading-card" onClick={onOpenBooks}>
+          <small>{reading ? 'Lendo agora' : 'Leitura'}</small>
+          <b>{reading ? reading.title : 'Escolher um livro'}</b>
+          {readingEntry && <span className="meter" aria-label={`${percentOf(readingEntry)}% lido`}><i style={{ width: `${percentOf(readingEntry)}%` }} /></span>}
+        </button>
+        <button className="expense-shortcut" onClick={onNewExpense}>+ Gasto</button>
+      </div>
 
       {connected && (otherEvents.length > 0 || eventsError) && (
         <>

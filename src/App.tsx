@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { formatLong, todayKey } from './core/dates';
 import { addExpense, addHabit, addTask, removeExpense, removeTask, updateExpense, updateTask } from './actions';
 import { ExpenseForm } from './components/ExpenseForm';
 import { HabitForm } from './components/HabitForm';
@@ -66,12 +67,15 @@ export default function App() {
     <div className="app">
       <div className="topbar">
         {inMore && <button className="icon-btn" onClick={() => setTab('more')} aria-label="Voltar"><Icon name="back" /></button>}
-        <h1>{title}</h1>
+        <div className="heading">
+          {tab === 'today' && <small>{formatLong(todayKey())}</small>}
+          <h1>{title}</h1>
+        </div>
       </div>
 
       <main className="screen">
         {tab === 'today' && (
-          <TodayScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} onNewHabit={() => setSheet('habit')} onOpenChallenge={() => setChallenge(true)} />
+          <TodayScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} onNewHabit={() => setSheet('habit')} onOpenChallenge={() => setChallenge(true)} onOpenBooks={() => setTab('books')} onNewExpense={() => setSheet('expense')} />
         )}
         {tab === 'agenda' && (
           <AgendaScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} />
