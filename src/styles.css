@@ -267,3 +267,8 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .sub:empty { display: none; }
 .bottom-nav { background: var(--bg); }
 .fab { box-shadow: none; }
+
+/* ---------- gastos ---------- */
+.total { text-align: center; padding: 8px 0 16px; }
+.total small { display: block; color: var(--muted); }
+.total strong { font-family: var(--serif); font-size: 32px; }

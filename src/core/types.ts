@@ -59,6 +59,17 @@ export interface Task {
   updatedAt: number;
 }
 
+export interface Expense {
+  id: string;
+  date: DateKey;
+  category: string;
+  /** Valor em centavos, para somar sem erro de arredondamento. */
+  amountCents: number;
+  note: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -99,6 +110,7 @@ export interface AppState {
   version: 1;
   habits: Habit[];
   tasks: Task[];
+  expenses: Expense[];
   categories: Category[];
   sessions: FocusSession[];
   timer: TimerState;

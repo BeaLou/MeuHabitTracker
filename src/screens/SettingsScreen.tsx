@@ -173,7 +173,7 @@ export function SettingsScreen({ state, onBack }: { state: AppState; onBack: () 
             </label>
             <p className="hint" style={{ marginTop: 4 }}>
               {g.driveSync
-                ? `Hábitos, histórico, tarefas e categorias ficam iguais em todos os aparelhos em que você entrar com esta conta.${g.lastDriveSyncAt ? ` Última: ${new Date(g.lastDriveSyncAt).toLocaleString('pt-BR')} — ${g.lastDriveMessage ?? ''}` : ''}`
+                ? `Hábitos, histórico, tarefas, gastos e categorias ficam iguais em todos os aparelhos em que você entrar com esta conta.${g.lastDriveSyncAt ? ` Última: ${new Date(g.lastDriveSyncAt).toLocaleString('pt-BR')} — ${g.lastDriveMessage ?? ''}` : ''}`
                 : 'Guarda uma cópia dos seus dados numa pasta privada do app no seu Drive (o app não vê seus outros arquivos).'}
             </p>
             <p className="hint" style={{ marginTop: 8 }}>
@@ -213,7 +213,7 @@ export function SettingsScreen({ state, onBack }: { state: AppState; onBack: () 
               }
             }}
           />
-          <button className="btn danger" onClick={() => { if (window.confirm('Apagar todos os hábitos, tarefas e histórico deste aparelho?')) resetAll(); }}>
+          <button className="btn danger" onClick={() => { if (window.confirm('Apagar todos os hábitos, tarefas, gastos e histórico deste aparelho?')) resetAll(); }}>
             Apagar todos os dados
           </button>
         </div>

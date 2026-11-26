@@ -18,6 +18,7 @@ const PATHS: Record<string, ReactNode> = {
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   skip: <path d="M5 12h14M13 6l6 6-6 6" />,
   sync: <path d="M20 11a8 8 0 00-14-4M4 5v4h4M4 13a8 8 0 0014 4M20 19v-4h-4" />,
+  wallet: <><rect x="3" y="6" width="18" height="13" rx="3" /><path d="M16 12.5h2" /></>,
   search: <><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></>,
   close: <path d="M6 6l12 12M18 6L6 18" />,
   done: <path d="M5 12.5l4.5 4.5L19 7.5" />,

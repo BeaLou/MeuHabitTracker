@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { addHabit, addTask, removeTask, updateTask } from './actions';
+import { addExpense, addHabit, addTask, removeExpense, removeTask, updateExpense, updateTask } from './actions';
+import { ExpenseForm } from './components/ExpenseForm';
 import { HabitForm } from './components/HabitForm';
 import { Icon, type IconName } from './components/Icon';
 import { ChallengeScreen } from './screens/ChallengeScreen';
@@ -8,6 +9,7 @@ import { TaskForm } from './components/TaskForm';
 import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
 import { AgendaScreen } from './screens/AgendaScreen';
 import { HabitDetail, type DetailTab } from './screens/HabitDetail';
+import { ExpensesScreen } from './screens/ExpensesScreen';
 import { HabitsScreen } from './screens/HabitsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TasksScreen } from './screens/TasksScreen';
@@ -15,17 +17,23 @@ import { TimerScreen } from './screens/TimerScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { useAppState } from './store';
 
-type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'timer';
+type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'more' | 'expenses' | 'timer';
 
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'today', label: 'Hoje', icon: 'today' },
   { id: 'agenda', label: 'Agenda', icon: 'calendar' },
   { id: 'habits', label: 'Hábitos', icon: 'habits' },
   { id: 'tasks', label: 'Tarefas', icon: 'tasks' },
+  { id: 'more', label: 'Mais', icon: 'more' },
+];
+
+/** Telas abertas pelo menu Mais. */
+const MORE: { id: Tab; label: string; icon: IconName }[] = [
+  { id: 'expenses', label: 'Gastos', icon: 'wallet' },
   { id: 'timer', label: 'Timer', icon: 'timer' },
 ];
 
-type SheetKind = null | 'chooser' | 'habit' | 'task';
+type SheetKind = null | 'chooser' | 'habit' | 'task' | 'expense';
 
 export default function App() {
   const state = useAppState();
@@ -41,16 +49,22 @@ export default function App() {
   const [settings, setSettings] = useState(false);
   const [sheet, setSheet] = useState<SheetKind>(null);
   const [editTask, setEditTask] = useState<string | null>(null);
+  const [editExpense, setEditExpense] = useState<string | null>(null);
+  const closeExpense = () => { setSheet(null); setEditExpense(null); };
   const closeDetail = useCallback(() => setDetail(null), []);
 
   const task = state.tasks.find((t) => t.id === editTask);
-  const showFab = tab === 'today' || tab === 'agenda' || tab === 'habits' || tab === 'tasks';
-  const onFab = () => setSheet(tab === 'habits' ? 'habit' : tab === 'tasks' ? 'task' : 'chooser');
+  const expense = state.expenses.find((e) => e.id === editExpense);
+  const inMore = MORE.some((m) => m.id === tab);
+  const title = tab === 'today' ? 'Oi, Bea' : [...TABS, ...MORE].find((t) => t.id === tab)!.label;
+  const showFab = tab === 'today' || tab === 'agenda' || tab === 'habits' || tab === 'tasks' || tab === 'expenses';
+  const onFab = () => setSheet(tab === 'habits' ? 'habit' : tab === 'tasks' ? 'task' : tab === 'expenses' ? 'expense' : 'chooser');
 
   return (
     <div className="app">
       <div className="topbar">
-        <h1>{tab === 'today' ? 'Oi, Bea' : TABS.find((t) => t.id === tab)!.label}</h1>
+        {inMore && <button className="icon-btn" onClick={() => setTab('more')} aria-label="Voltar"><Icon name="back" /></button>}
+        <h1>{title}</h1>
         <button className="icon-btn" onClick={() => setSettings(true)} aria-label="Ajustes"><Icon name="gear" /></button>
       </div>
 
@@ -66,6 +80,18 @@ export default function App() {
         )}
         {tab === 'tasks' && <TasksScreen state={state} onEditTask={setEditTask} />}
         {tab === 'timer' && <TimerScreen state={state} />}
+        {tab === 'expenses' && <ExpensesScreen state={state} onEdit={setEditExpense} />}
+        {tab === 'more' && (
+          <div>
+            {MORE.map((m) => (
+              <button key={m.id} className="row" style={{ width: '100%' }} onClick={() => setTab(m.id)}>
+                <span className="ico"><Icon name={m.icon} /></span>
+                <span className="main title">{m.label}</span>
+                <Icon name="next" />
+              </button>
+            ))}
+          </div>
+        )}
       </main>
 
       {showFab && (
@@ -74,7 +100,7 @@ export default function App() {
 
       <nav className="bottom-nav" aria-label="Navegação principal">
         {TABS.map((t) => (
-          <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'page' : undefined}>
+          <button key={t.id} className={tab === t.id || (t.id === 'more' && inMore) ? 'active' : ''} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'page' : undefined}>
             <span className="pill"><Icon name={t.icon} /></span>
             {t.label}
           </button>
@@ -101,6 +127,17 @@ export default function App() {
             submitLabel="Criar hábito"
             onCancel={() => setSheet(null)}
             onSubmit={(d) => { addHabit(d); setSheet(null); }}
+          />
+        </Sheet>
+      )}
+      {(sheet === 'expense' || expense) && (
+        <Sheet title={expense ? 'Editar gasto' : 'Novo gasto'} onClose={closeExpense}>
+          <ExpenseForm
+            key={expense?.id ?? 'new'}
+            initial={expense}
+            onCancel={closeExpense}
+            onSubmit={(d) => { if (expense) updateExpense(expense.id, d); else addExpense(d); closeExpense(); }}
+            onDelete={expense ? () => { if (window.confirm('Excluir este gasto?')) { removeExpense(expense.id); closeExpense(); } } : undefined}
           />
         </Sheet>
       )}
