@@ -103,7 +103,18 @@ export interface Book {
   coverUrl: string | null;
   status: BookStatus;
   progress?: ProgressEntry[];
+  /** Nota de 0,5 a 5. */
+  rating?: number;
+  /** Dia em que a leitura terminou; '' = não sei (não conta na meta do ano). */
+  finishedAt?: DateKey | '';
   createdAt: number;
+  updatedAt: number;
+}
+
+/** Metas sincronizadas entre aparelhos: 'reading:AAAA' (livros no ano) e 'spending:week' (centavos). 0 = sem meta. */
+export interface Target {
+  id: string;
+  value: number;
   updatedAt: number;
 }
 
@@ -149,6 +160,7 @@ export interface AppState {
   tasks: Task[];
   expenses: Expense[];
   books: Book[];
+  targets: Target[];
   categories: Category[];
   sessions: FocusSession[];
   timer: TimerState;

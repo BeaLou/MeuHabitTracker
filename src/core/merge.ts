@@ -76,6 +76,8 @@ export function mergeStates(local: AppState, remote: Partial<AppState>, now = Da
     return { ...win, progress: [...entries.values()].sort((a, b) => a.at - b.at) };
   }).map((b) => (b.progress ? { ...b, progress: b.progress.filter((e) => tombs[e.id] === undefined) } : b));
 
+  const targets = mergeById(local.targets, remote.targets ?? [], tombs);
+
   const sessions = new Map<string, FocusSession>();
   for (const s of [...local.sessions, ...(remote.sessions ?? [])]) sessions.set(s.id, s);
 
@@ -85,6 +87,7 @@ export function mergeStates(local: AppState, remote: Partial<AppState>, now = Da
     tasks,
     expenses,
     books,
+    targets,
     categories: categories.length ? categories : local.categories,
     sessions: [...sessions.values()].sort((a, b) => b.startedAt - a.startedAt).slice(0, 200),
     tombstones: tombs,
@@ -99,6 +102,7 @@ export function shareable(s: AppState) {
     tasks: s.tasks,
     expenses: s.expenses,
     books: s.books,
+    targets: s.targets,
     categories: s.categories,
     sessions: s.sessions,
     tombstones: s.tombstones,
@@ -129,5 +133,6 @@ export function shareSignature(s: AppState): string {
   const c = s.categories.map((x) => `${x.id}:${x.updatedAt ?? 0}`);
   const e = s.expenses.map((x) => `${x.id}:${x.updatedAt}`);
   const b = s.books.map((x) => `${x.id}:${x.updatedAt}`);
-  return [h.join('|'), t.join('|'), e.join('|'), b.join('|'), c.join('|'), Object.keys(s.tombstones).length, s.sessions.length].join('#');
+  const g = s.targets.map((x) => `${x.id}:${x.updatedAt}`);
+  return [g.join('|'), h.join('|'), t.join('|'), e.join('|'), b.join('|'), c.join('|'), Object.keys(s.tombstones).length, s.sessions.length].join('#');
 }

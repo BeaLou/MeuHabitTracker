@@ -1,11 +1,12 @@
 import { challengeHabits } from './core/challenge';
-import { todayKey, type DateKey } from './core/dates';
+import { todayKey, toKey, type DateKey } from './core/dates';
 import { createInitialState, exampleHabits, makeHabit, makeTask, newId } from './core/defaults';
 import { applyStatus, tapGoal } from './core/goals';
 import { nextStatus } from './core/habits';
 import type { BookInfo } from './core/books';
 import { percentOf } from './core/progress';
-import type { AppState, BookStatus, Category, DayStatus, Expense, Habit, ProgressEntry, Task } from './core/types';
+import { finishedOn } from './core/reading';
+import type { AppState, Book, BookStatus, Category, DayStatus, Expense, Habit, ProgressEntry, Task } from './core/types';
 import { store } from './store';
 
 const touch = <T extends { updatedAt: number }>(x: T, patch: Partial<T>): T => ({ ...x, ...patch, updatedAt: Date.now() });
@@ -123,11 +124,25 @@ export function removeExpense(id: string) {
 
 export function addBook(info: BookInfo, status: BookStatus) {
   const now = Date.now();
-  store.update((s) => ({ ...s, books: [...s.books, { ...info, status, id: newId(), createdAt: now, updatedAt: now }] }));
+  // salvo direto como lido: não se sabe quando terminou, até a data ser informada
+  const finished = status === 'read' ? { finishedAt: '' as const } : {};
+  store.update((s) => ({ ...s, books: [...s.books, { ...info, ...finished, status, id: newId(), createdAt: now, updatedAt: now }] }));
 }
 
 export function setBookStatus(id: string, status: BookStatus) {
-  store.update((s) => ({ ...s, books: s.books.map((b) => (b.id === id ? touch(b, { status }) : b)) }));
+  store.update((s) => ({ ...s, books: s.books.map((b) => {
+    if (b.id !== id) return b;
+    return touch(b, { status, finishedAt: status === 'read' ? todayKey() : undefined });
+  }) }));
+}
+
+export function updateBook(id: string, patch: Partial<Pick<Book, 'rating' | 'finishedAt'>>) {
+  // grava a data de término junto, para avaliar um livro antigo não mudar quando ele foi lido
+  store.update((s) => ({ ...s, books: s.books.map((b) => (b.id === id ? touch(b, { finishedAt: finishedOn(b), ...patch }) : b)) }));
+}
+
+export function setTarget(id: string, value: number) {
+  store.update((s) => ({ ...s, targets: [...s.targets.filter((t) => t.id !== id), { id, value, updatedAt: Date.now() }] }));
 }
 
 export function removeBook(id: string) {
@@ -143,7 +158,8 @@ export function addProgress(bookId: string, input: Omit<ProgressEntry, 'id'>) {
       const progress = [...(b.progress ?? []), entry];
       // registrar leitura tira de "Quero ler"; chegar ao fim marca como lido
       const status: BookStatus = percentOf(entry) === 100 ? 'read' : b.status === 'want' ? 'reading' : b.status;
-      return touch(b, { progress, status });
+      const finished = status === 'read' && b.status !== 'read' ? { finishedAt: toKey(new Date(entry.at)) } : {};
+      return touch(b, { progress, status, ...finished });
     }),
   }));
 }
@@ -254,6 +270,11 @@ export function importJson(text: string): void {
       ...initial,
       ...parsed,
       version: 1,
+      // o backup restaurado vale como a edição mais recente das metas; as que não estão nele são zeradas
+      targets: [
+        ...(parsed.targets ?? []),
+        ...cur.targets.filter((t) => !(parsed.targets ?? []).some((x) => x.id === t.id)).map((t) => ({ ...t, value: 0 })),
+      ].map((t) => ({ ...t, updatedAt: now })),
       timer: { ...initial.timer, ...(parsed.timer ?? {}), status: 'idle', endsAt: null, remainingSec: null },
       // ajustes do Google são do aparelho: o backup não os sobrescreve
       google: cur.google,
@@ -272,6 +293,7 @@ export function resetAll() {
     for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses, ...cur.books]) tombstones[x.id] = now;
     return {
       ...initial,
+      targets: cur.targets.map((t) => ({ ...t, value: 0, updatedAt: now })),
       categories: initial.categories.map((c) => ({ ...c, updatedAt: now })),
       google: cur.google,
       pendingEventDeletes: [
