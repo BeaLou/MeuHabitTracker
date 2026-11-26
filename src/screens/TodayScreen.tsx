@@ -3,6 +3,8 @@ import { addExamples, cycleDay, toggleTask } from '../actions';
 import { WEEKDAY_SHORT, addDays, dayNumber, fromKey, startOfWeek, todayKey, formatLong } from '../core/dates';
 import { cellStatus, isDue } from '../core/habits';
 import type { AppState } from '../core/types';
+import { ChallengeCard } from '../components/ChallengeCard';
+import { ScoreRing } from '../components/ScoreRing';
 import { Icon } from '../components/Icon';
 import { listDayEvents, type DayEvent } from '../google/sync';
 
@@ -39,6 +41,10 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
     )
     .sort((a, b) => Number(a.done) - Number(b.done) || b.priority - a.priority);
 
+  const dueToday = state.habits.filter((h) => !h.archived && isDue(h, today));
+  const doneToday = dueToday.filter((h) => h.log[today] === 'done').length;
+  const progress = dueToday.length ? Math.round((doneToday / dueToday.length) * 100) : 0;
+
   const connected = state.google.connected;
   useEffect(() => {
     if (!connected) {
@@ -58,7 +64,14 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
 
   return (
     <div>
-      <button className="challenge-entry" onClick={onOpenChallenge}>🌸 Desafio 75 <span>Abrir ›</span></button>
+      <div className="greet">
+        <div>
+          <h2>Oi, Bea</h2>
+          <p className="hint">{dueToday.length ? `${doneToday} de ${dueToday.length} hábitos de hoje` : 'Nenhum hábito para hoje'}</p>
+        </div>
+        <ScoreRing value={progress} size={68} stroke={7} label="Progresso de hoje, em %" />
+      </div>
+      <ChallengeCard habits={state.habits} onOpen={onOpenChallenge} />
       <div className="week">
         <button className="icon-btn" aria-label="Semana anterior" onClick={() => setSelected(addDays(selected, -7))}><Icon name="back" /></button>
         <div className="days">
@@ -81,7 +94,8 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
 
       {empty && (
         <div className="empty">
-          <div className="big">🌱</div>
+          <Icon name="search" />
+          <p className="lead">Nenhuma pista por aqui ainda.</p>
           <p>Nenhum hábito ainda. Crie o primeiro ou comece com alguns exemplos.</p>
           <div className="btns" style={{ width: '100%' }}>
             <button className="btn" onClick={onNewHabit}>Criar hábito</button>
@@ -100,8 +114,8 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
               <div className="title">{h.name}</div>
               <div className="sub">
                 <span className="tag" style={{ color: c?.color }}>Hábito</span>
-                {h.time && <span>⏰ {h.time}</span>}
-                {h.gcal && <span>📅</span>}
+                {h.time && <span><Icon name="timer" /> {h.time}</span>}
+                {h.gcal && <span aria-label="Na agenda"><Icon name="calendar" /></span>}
               </div>
             </button>
             <button

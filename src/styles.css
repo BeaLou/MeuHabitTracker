@@ -1,13 +1,14 @@
 :root {
-  --bg: #0b0b10;
-  --surface: #14141c;
-  --surface-2: #1d1d28;
-  --line: #2a2a38;
-  --text: #f2f2f7;
-  --muted: #8d8da0;
-  --accent: #7c5cff;
-  --accent-soft: rgba(124, 92, 255, 0.18);
-  --green: #3ddc84;
+  --bg: #1c0f16;
+  --surface: #26151e;
+  --surface-2: #321c27;
+  --line: #4a2b3b;
+  --text: #fbeef3;
+  --muted: #bf9baa;
+  --accent: #f08ab8;
+  --accent-soft: rgba(240, 138, 184, 0.18);
+  --green: #9dbf9e;
+  --serif: 'Fraunces', Georgia, serif;
   --amber: #ffb020;
   --red: #ff5c6c;
   --radius: 16px;
@@ -48,7 +49,7 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .bottom-nav button.active .pill { background: var(--accent-soft); color: var(--accent); }
 .bottom-nav .pill { padding: 3px 12px; border-radius: 999px; display: grid; place-items: center; }
 
-.fab { position: absolute; right: 18px; bottom: 86px; width: 56px; height: 56px; border-radius: 18px; background: var(--accent); color: white; display: grid; place-items: center; box-shadow: 0 8px 24px rgba(124, 92, 255, 0.45); z-index: 9; }
+.fab { position: absolute; right: 18px; bottom: 86px; width: 56px; height: 56px; border-radius: 18px; background: var(--accent); color: var(--bg); display: grid; place-items: center; box-shadow: 0 8px 24px rgba(240, 138, 184, 0.3); z-index: 9; }
 .fab svg { width: 28px; height: 28px; stroke-width: 2.2; }
 
 /* faixa semanal */
@@ -56,13 +57,14 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .week .days { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .week .d { display: grid; justify-items: center; gap: 2px; padding: 6px 0; border-radius: 14px; color: var(--muted); font-size: 11px; }
 .week .d b { font-size: 17px; color: var(--text); font-weight: 600; }
-.week .d.sel { background: var(--accent); color: #fff; }
+.week .d.sel { background: var(--accent); color: var(--bg); }
+.week .d.sel b { color: var(--bg); }
 .week .d.today:not(.sel) b { color: var(--accent); }
 
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
 .chip { flex: none; padding: 7px 14px; border-radius: 12px; background: var(--surface-2); color: var(--muted); font-size: 14px; border: 1px solid transparent; white-space: nowrap; }
-.chip.on { background: var(--accent-soft); color: #cfc3ff; border-color: var(--accent); }
+.chip.on { background: var(--accent-soft); color: #ffd3e6; border-color: var(--accent); }
 
 /* linhas da tela Hoje */
 .row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
@@ -72,7 +74,7 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .row.done .title { color: var(--muted); text-decoration: line-through; }
 .sub { font-size: 12px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .tag { padding: 1px 7px; border-radius: 6px; font-size: 11px; background: var(--surface-2); }
-.check { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; flex: none; color: #0b0b10; }
+.check { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; flex: none; color: var(--bg); }
 .check svg { width: 18px; height: 18px; stroke-width: 3; }
 .check.done { background: var(--green); border-color: var(--green); }
 .check.skipped { background: var(--amber); border-color: var(--amber); }
@@ -137,7 +139,7 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
 .swatches button { width: 30px; height: 30px; border-radius: 50%; border: 3px solid transparent; }
 .swatches button.on { border-color: #fff; }
-.btn { background: var(--accent); color: #fff; padding: 12px 18px; border-radius: 14px; font-weight: 600; text-align: center; }
+.btn { background: var(--accent); color: var(--bg); padding: 12px 18px; border-radius: 14px; font-weight: 600; text-align: center; }
 .btn.ghost { background: var(--surface-2); color: var(--text); }
 .btn.danger { background: rgba(255, 92, 108, 0.15); color: var(--red); }
 .btn:disabled { opacity: 0.5; cursor: default; }
@@ -165,11 +167,18 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .event time { color: var(--muted); font-size: 12px; min-width: 44px; }
 .toast { position: absolute; left: 16px; right: 16px; bottom: 90px; background: var(--surface-2); border: 1px solid var(--line); padding: 12px 14px; border-radius: 14px; z-index: 40; }
 
-/* ---- Desafio 75 (tema rosa) ---- */
-.challenge-entry { display: flex; justify-content: space-between; width: 100%; padding: 14px; margin-bottom: 8px; border-radius: var(--radius); background: rgba(244, 114, 176, 0.16); border: 1px solid #f472b0; color: #ffc2dd; font-weight: 600; }
-.challenge { --accent: #f472b0; --accent-soft: rgba(244, 114, 176, 0.18); --green: #f472b0; --bg: #1c0f16; --surface-2: #2a1721; --line: #4a2b3b; }
-.challenge .btn { color: #1c0f16; }
-.challenge .btn.ghost { color: var(--text); }
+/* ---- identidade e Desafio 75 ---- */
+.topbar h1, .greet h2, .empty p.lead { font-family: var(--serif); letter-spacing: -0.01em; }
+.greet { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.greet h2 { font-size: 24px; }
+.greet .ring .num { font-size: 18px; }
+.challenge-entry { display: block; width: 100%; text-align: left; padding: 12px 14px; margin-bottom: 12px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--accent); }
+.challenge-entry .top { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+.challenge-entry .top b { font-family: var(--serif); }
+.challenge-entry .bar { display: block; height: 6px; margin-top: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.challenge-entry .bar i { display: block; height: 100%; background: var(--accent); }
+.empty svg.icon { width: 40px; height: 40px; color: var(--accent); }
+.sub svg.icon { width: 13px; height: 13px; }
 .challenge progress { width: 100%; accent-color: var(--accent); }
 .challenge .check:disabled { opacity: 0.35; cursor: default; }
 .c-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; margin-top: 8px; }
@@ -192,7 +201,7 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .mcell.out { opacity: 0.4; }
 .mcell.sel { background: var(--accent-soft); }
 .mcell .num { align-self: center; font-size: 12px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; }
-.mcell.today .num { background: var(--accent); color: #fff; font-weight: 700; }
+.mcell.today .num { background: var(--accent); color: var(--bg); font-weight: 700; }
 .mchip { display: block; font-size: 9.5px; line-height: 1.25; padding: 1px 3px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mchip i { display: none; font-style: normal; opacity: 0.8; margin-right: 4px; }
 .mchip.allday { background: #2b6cb0; color: #fff; }

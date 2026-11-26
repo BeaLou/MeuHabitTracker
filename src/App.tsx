@@ -7,7 +7,6 @@ import { Sheet } from './components/Sheet';
 import { TaskForm } from './components/TaskForm';
 import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
 import { AgendaScreen } from './screens/AgendaScreen';
-import { CategoriesScreen } from './screens/CategoriesScreen';
 import { HabitDetail, type DetailTab } from './screens/HabitDetail';
 import { HabitsScreen } from './screens/HabitsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -16,14 +15,13 @@ import { TimerScreen } from './screens/TimerScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { useAppState } from './store';
 
-type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'categories' | 'timer';
+type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'timer';
 
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'today', label: 'Hoje', icon: 'today' },
   { id: 'agenda', label: 'Agenda', icon: 'calendar' },
   { id: 'habits', label: 'Hábitos', icon: 'habits' },
   { id: 'tasks', label: 'Tarefas', icon: 'tasks' },
-  { id: 'categories', label: 'Categorias', icon: 'categories' },
   { id: 'timer', label: 'Timer', icon: 'timer' },
 ];
 
@@ -67,7 +65,6 @@ export default function App() {
           <HabitsScreen state={state} onOpenHabit={(id, t) => setDetail({ id, tab: t })} onNewHabit={() => setSheet('habit')} onOpenChallenge={() => setChallenge(true)} />
         )}
         {tab === 'tasks' && <TasksScreen state={state} onEditTask={setEditTask} />}
-        {tab === 'categories' && <CategoriesScreen state={state} />}
         {tab === 'timer' && <TimerScreen state={state} />}
       </main>
 
