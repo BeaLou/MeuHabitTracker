@@ -58,7 +58,7 @@ export default function App() {
 
       <main className="screen">
         {tab === 'today' && (
-          <TodayScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} onNewHabit={() => setSheet('habit')} />
+          <TodayScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} onNewHabit={() => setSheet('habit')} onOpenChallenge={() => setChallenge(true)} />
         )}
         {tab === 'agenda' && (
           <AgendaScreen state={state} onOpenHabit={(id) => setDetail({ id, tab: 'calendar' })} onEditTask={setEditTask} />

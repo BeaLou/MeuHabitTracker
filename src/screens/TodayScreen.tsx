@@ -11,9 +11,10 @@ interface Props {
   onOpenHabit: (id: string) => void;
   onEditTask: (id: string) => void;
   onNewHabit: () => void;
+  onOpenChallenge: () => void;
 }
 
-export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit }: Props) {
+export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpenChallenge }: Props) {
   const today = todayKey();
   const [selected, setSelected] = useState(today);
   const [cat, setCat] = useState<string>('all');
@@ -57,6 +58,7 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit }: Prop
 
   return (
     <div>
+      <button className="challenge-entry" onClick={onOpenChallenge}>🌸 Desafio 75 <span>Abrir ›</span></button>
       <div className="week">
         <button className="icon-btn" aria-label="Semana anterior" onClick={() => setSelected(addDays(selected, -7))}><Icon name="back" /></button>
         <div className="days">
