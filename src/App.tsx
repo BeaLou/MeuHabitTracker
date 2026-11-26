@@ -9,6 +9,7 @@ import { TaskForm } from './components/TaskForm';
 import { useAutoDriveSync, useAutoSync, useReminders, useTimerWatcher, useTokenRenewal } from './hooks';
 import { AgendaScreen } from './screens/AgendaScreen';
 import { HabitDetail, type DetailTab } from './screens/HabitDetail';
+import { BooksScreen } from './screens/BooksScreen';
 import { ExpensesScreen } from './screens/ExpensesScreen';
 import { HabitsScreen } from './screens/HabitsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -17,7 +18,7 @@ import { TimerScreen } from './screens/TimerScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { useAppState } from './store';
 
-type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'more' | 'expenses' | 'timer';
+type Tab = 'today' | 'agenda' | 'habits' | 'tasks' | 'more' | 'books' | 'expenses' | 'timer';
 
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'today', label: 'Hoje', icon: 'today' },
@@ -29,6 +30,7 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
 
 /** Telas abertas pelo menu Mais. */
 const MORE: { id: Tab; label: string; icon: IconName }[] = [
+  { id: 'books', label: 'Livros', icon: 'book' },
   { id: 'expenses', label: 'Gastos', icon: 'wallet' },
   { id: 'timer', label: 'Timer', icon: 'timer' },
 ];
@@ -80,6 +82,7 @@ export default function App() {
         )}
         {tab === 'tasks' && <TasksScreen state={state} onEditTask={setEditTask} />}
         {tab === 'timer' && <TimerScreen state={state} />}
+        {tab === 'books' && <BooksScreen state={state} />}
         {tab === 'expenses' && <ExpensesScreen state={state} onEdit={setEditExpense} />}
         {tab === 'more' && (
           <div>

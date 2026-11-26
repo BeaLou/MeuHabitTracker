@@ -70,6 +70,36 @@ export interface Expense {
   updatedAt: number;
 }
 
+export type BookStatus = 'want' | 'reading' | 'read';
+
+export type ProgressMode = 'pages' | 'percent' | 'minutes';
+
+export interface ProgressEntry {
+  id: string;
+  /** Momento da leitura (ms). */
+  at: number;
+  mode: ProgressMode;
+  /** Página, porcentagem ou minuto em que a leitura parou. */
+  value: number;
+  /** Total de páginas ou minutos; 100 no modo porcentagem. */
+  total: number;
+  emotions: string[];
+  comment: string;
+}
+
+export interface Book {
+  id: string;
+  title: string;
+  authors: string;
+  year: number | null;
+  isbn: string | null;
+  coverUrl: string | null;
+  status: BookStatus;
+  progress?: ProgressEntry[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -111,6 +141,7 @@ export interface AppState {
   habits: Habit[];
   tasks: Task[];
   expenses: Expense[];
+  books: Book[];
   categories: Category[];
   sessions: FocusSession[];
   timer: TimerState;

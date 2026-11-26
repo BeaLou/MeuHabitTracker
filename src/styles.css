@@ -272,3 +272,21 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .total { text-align: center; padding: 8px 0 16px; }
 .total small { display: block; color: var(--muted); }
 .total strong { font-family: var(--serif); font-size: 32px; }
+
+/* ---------- livros ---------- */
+.cover { width: 44px; height: 64px; border-radius: 6px; object-fit: cover; background: var(--surface-2); flex: none; }
+.book-status { width: auto; margin-top: 6px; padding: 4px 8px; font-size: 12px; }
+.tabs button { font-size: 13px; }
+
+/* ---------- progresso de leitura ---------- */
+.slider { padding: 0; border: 0; background: transparent; accent-color: var(--accent); }
+.read-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.read-bar span { flex: 1; height: 5px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.read-bar i { display: block; height: 100%; background: var(--accent); }
+.read-bar small { color: var(--muted); }
+.main .btn.small { margin-top: 8px; }
+.emotions { display: flex; flex-wrap: wrap; gap: 6px; }
+.emotions button { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 99px; border: 1px solid var(--line); font-size: 13px; }
+.emotions button.on { background: var(--accent-soft); border-color: var(--accent); }
+.emotions i { width: 8px; height: 8px; border-radius: 50%; }
+.comment { margin-top: 4px; font-size: 13px; white-space: pre-line; overflow-wrap: anywhere; }
