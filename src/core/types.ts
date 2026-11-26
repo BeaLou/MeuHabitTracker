@@ -17,6 +17,8 @@ export interface CalendarLink {
   syncedAt: number;
 }
 
+export type PoSource = 'workout' | 'cardio' | 'photo' | 'protein' | 'water' | 'sleep' | 'meals' | 'move' | 'steps';
+
 export interface Habit {
   id: string;
   name: string;
@@ -33,6 +35,10 @@ export interface Habit {
   /** Quantidade registrada em cada dia, para hábitos com `goal`. */
   amounts?: Record<DateKey, number>;
   amountsAt?: Record<DateKey, number>;
+  /** O que, no app Por o Shape, conclui este hábito. */
+  link?: PoSource;
+  /** "fonte:data" -> maior valor já importado, para não remarcar o que foi desmarcado à mão. */
+  linkSeen?: Record<string, number>;
   startDate: DateKey;
   targetDate: DateKey | null;
   /** "HH:mm" — necessário para sincronizar com a agenda. */

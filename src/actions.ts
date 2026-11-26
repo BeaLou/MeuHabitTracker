@@ -4,6 +4,7 @@ import { createInitialState, exampleHabits, makeHabit, makeTask, newId } from '.
 import { applyStatus, tapGoal } from './core/goals';
 import { nextStatus } from './core/habits';
 import type { BookInfo } from './core/books';
+import { importFromPo, type PoRecord } from './core/poroshape';
 import { percentOf } from './core/progress';
 import { finishedOn } from './core/reading';
 import type { AppState, Book, BookStatus, Category, DayStatus, Expense, Habit, ProgressEntry, Task } from './core/types';
@@ -44,6 +45,11 @@ const changeDay = (id: string, change: (h: Habit) => Habit) =>
 
 export function setDayStatus(id: string, key: DateKey, status: DayStatus | null) {
   changeDay(id, (h) => applyStatus(h, key, status, Date.now()));
+}
+
+export function syncPorOShape(records: PoRecord[]) {
+  const habits = importFromPo(store.get().habits, records, todayKey(), Date.now());
+  if (habits !== store.get().habits) store.update((s) => ({ ...s, habits }));
 }
 
 export function addAmount(id: string, key: DateKey) {

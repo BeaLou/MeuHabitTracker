@@ -65,6 +65,9 @@ export function mergeStates(local: AppState, remote: Partial<AppState>, now = Da
     const amounts = mergeMap(win.amounts ?? {}, win.amountsAt, lose.amounts ?? {}, lose.amountsAt);
     const nonEmpty = (m: Record<string, number>) => (Object.keys(m).length ? m : undefined);
     const merged = Object.keys(amounts.at).length ? { amounts: amounts.value, amountsAt: nonEmpty(amounts.at) } : {};
+    const seen: Record<string, number> = { ...lose.linkSeen };
+    for (const [k, v] of Object.entries(win.linkSeen ?? {})) seen[k] = Math.max(v, seen[k] ?? 0);
+    if (Object.keys(seen).length) Object.assign(merged, { linkSeen: seen });
     return { ...win, ...merged, log: log.value, logAt: nonEmpty(log.at), notes: notes.value, notesAt: nonEmpty(notes.at), gcal: win.gcal ?? lose.gcal };
   });
   const tasks = mergeById(local.tasks, remote.tasks ?? [], tombs);

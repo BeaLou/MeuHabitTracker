@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { PO_SOURCES, PO_WINDOW } from '../core/poroshape';
+import { readPorOShape } from '../poroshape';
 import { WEEKDAY_LETTER, todayKey } from '../core/dates';
 import { EMOJI_CHOICES } from '../core/defaults';
 import type { Category, Frequency, Habit } from '../core/types';
@@ -7,7 +9,7 @@ import { googleConfigured } from '../google/auth';
 export type HabitDraft = Pick<
   Habit,
   | 'name' | 'description' | 'emoji' | 'categoryId' | 'priority' | 'frequency' | 'startDate' | 'targetDate'
-  | 'weeklyTimes' | 'goal' | 'time' | 'durationMin' | 'reminderMinutes' | 'syncToCalendar'
+  | 'weeklyTimes' | 'goal' | 'link' | 'time' | 'durationMin' | 'reminderMinutes' | 'syncToCalendar'
 >;
 
 export function draftFrom(h?: Habit, categoryId?: string): HabitDraft {
@@ -20,6 +22,7 @@ export function draftFrom(h?: Habit, categoryId?: string): HabitDraft {
     frequency: h?.frequency ?? { type: 'daily' },
     weeklyTimes: h?.weeklyTimes,
     goal: h?.goal,
+    link: h?.link,
     startDate: h?.startDate ?? todayKey(),
     targetDate: h?.targetDate ?? null,
     time: h?.time ?? null,
@@ -37,6 +40,20 @@ const REMINDER_OPTIONS: { value: string; label: string }[] = [
   { value: '30', label: '30 min antes' },
   { value: '60', label: '1 hora antes' },
 ];
+
+function PoStatus({ source }: { source: NonNullable<HabitDraft['link']> }) {
+  const [found, setFound] = useState<boolean | null>(null);
+  useEffect(() => {
+    void readPorOShape().then((records) => setFound(records !== null));
+  }, []);
+  return (
+    <>
+      <span className="hint">Ao abrir o Ritmo, confere os últimos {PO_WINDOW} dias. Só marca, nunca desmarca.{(source === 'cardio' || source === 'steps') && ' Com meta por dia, o valor preenche a meta.'}{source === 'steps' && ' Sem meta, conclui com 7 mil passos.'}</span>
+      {found === false && <span className="warn">Não encontrei dados do Por o Shape neste navegador. Abra o Por o Shape aqui, no mesmo aparelho.</span>}
+      {found && <span className="hint">Por o Shape encontrado neste aparelho ✓</span>}
+    </>
+  );
+}
 
 interface Props {
   initial?: Habit;
@@ -143,6 +160,15 @@ export function HabitForm({ initial, categories, googleConnected, submitLabel, o
             <input type="number" inputMode="numeric" min={1} style={{ width: 90 }} value={d.goal.step || ''} onChange={(e) => setGoal({ step: Math.max(0, Math.round(Number(e.target.value) || 0)) })} />
           </label>
         )}
+      </div>
+
+      <div className="field">
+        <label htmlFor="h-link">Concluir pelo Por o Shape</label>
+        <select id="h-link" value={d.link ?? ''} onChange={(e) => set('link', (e.target.value || undefined) as HabitDraft['link'])}>
+          <option value="">Não vincular</option>
+          {PO_SOURCES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+        </select>
+        {d.link && <PoStatus source={d.link} />}
       </div>
 
       <div className="inline">
