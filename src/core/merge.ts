@@ -67,6 +67,7 @@ export function mergeStates(local: AppState, remote: Partial<AppState>, now = Da
   });
   const tasks = mergeById(local.tasks, remote.tasks ?? [], tombs);
   const categories = mergeById(local.categories, remote.categories ?? [], tombs);
+  const expenses = mergeById(local.expenses, remote.expenses ?? [], tombs);
 
   const sessions = new Map<string, FocusSession>();
   for (const s of [...local.sessions, ...(remote.sessions ?? [])]) sessions.set(s.id, s);
@@ -75,6 +76,7 @@ export function mergeStates(local: AppState, remote: Partial<AppState>, now = Da
     ...local,
     habits,
     tasks,
+    expenses,
     categories: categories.length ? categories : local.categories,
     sessions: [...sessions.values()].sort((a, b) => b.startedAt - a.startedAt).slice(0, 200),
     tombstones: tombs,
@@ -87,6 +89,7 @@ export function shareable(s: AppState) {
     version: 1 as const,
     habits: s.habits,
     tasks: s.tasks,
+    expenses: s.expenses,
     categories: s.categories,
     sessions: s.sessions,
     tombstones: s.tombstones,
@@ -114,5 +117,6 @@ export function shareSignature(s: AppState): string {
   });
   const t = s.tasks.map((x) => `${x.id}:${x.updatedAt}`);
   const c = s.categories.map((x) => `${x.id}:${x.updatedAt ?? 0}`);
-  return [h.join('|'), t.join('|'), c.join('|'), Object.keys(s.tombstones).length, s.sessions.length].join('#');
+  const e = s.expenses.map((x) => `${x.id}:${x.updatedAt}`);
+  return [h.join('|'), t.join('|'), e.join('|'), c.join('|'), Object.keys(s.tombstones).length, s.sessions.length].join('#');
 }

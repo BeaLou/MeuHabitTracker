@@ -2,7 +2,7 @@ import { challengeHabits } from './core/challenge';
 import { todayKey, type DateKey } from './core/dates';
 import { createInitialState, exampleHabits, makeHabit, makeTask, newId } from './core/defaults';
 import { nextStatus } from './core/habits';
-import type { AppState, Category, DayStatus, Habit, Task } from './core/types';
+import type { AppState, Category, DayStatus, Expense, Habit, Task } from './core/types';
 import { store } from './store';
 
 const touch = <T extends { updatedAt: number }>(x: T, patch: Partial<T>): T => ({ ...x, ...patch, updatedAt: Date.now() });
@@ -101,6 +101,23 @@ export function removeTask(id: string) {
   store.update((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id), tombstones: { ...s.tombstones, [id]: Date.now() } }));
 }
 
+/* ---------- gastos ---------- */
+
+export type ExpenseInput = Pick<Expense, 'date' | 'category' | 'amountCents' | 'note'>;
+
+export function addExpense(input: ExpenseInput) {
+  const now = Date.now();
+  store.update((s) => ({ ...s, expenses: [...s.expenses, { ...input, id: newId(), createdAt: now, updatedAt: now }] }));
+}
+
+export function updateExpense(id: string, patch: ExpenseInput) {
+  store.update((s) => ({ ...s, expenses: s.expenses.map((e) => (e.id === id ? touch(e, patch) : e)) }));
+}
+
+export function removeExpense(id: string) {
+  store.update((s) => ({ ...s, expenses: s.expenses.filter((e) => e.id !== id), tombstones: { ...s.tombstones, [id]: Date.now() } }));
+}
+
 /* ---------- categorias ---------- */
 
 export function addCategory(input: Omit<Category, 'id'>): Category {
@@ -192,9 +209,9 @@ export function importJson(text: string): void {
   const now = Date.now();
   store.update((cur) => {
     // o que existe hoje e não está no backup vira "excluído", para o sync com o Drive não trazer de volta
-    const keep = new Set([...parsed.habits!.map((h) => h.id), ...parsed.tasks!.map((t) => t.id)]);
+    const keep = new Set([...parsed.habits!, ...parsed.tasks!, ...(parsed.expenses ?? [])].map((x) => x.id));
     const tombstones = { ...cur.tombstones, ...(parsed.tombstones ?? {}) };
-    for (const x of [...cur.habits, ...cur.tasks]) if (!keep.has(x.id)) tombstones[x.id] = now;
+    for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses]) if (!keep.has(x.id)) tombstones[x.id] = now;
     return {
       ...initial,
       ...parsed,
@@ -214,7 +231,7 @@ export function resetAll() {
   store.update((cur) => {
     const initial = createInitialState();
     const tombstones = { ...cur.tombstones };
-    for (const x of [...cur.habits, ...cur.tasks]) tombstones[x.id] = now;
+    for (const x of [...cur.habits, ...cur.tasks, ...cur.expenses]) tombstones[x.id] = now;
     return {
       ...initial,
       categories: initial.categories.map((c) => ({ ...c, updatedAt: now })),
