@@ -145,7 +145,7 @@ export function useAutoDriveSync() {
     try {
       await driveSyncNow();
     } catch {
-      setGoogleState({ lastDriveMessage: 'Não foi possível sincronizar: toque em Sincronizar nos Ajustes para reconectar.' });
+      setGoogleState({ lastDriveMessage: 'Não foi possível sincronizar: toque em Sincronizar em Mais → Ajustes para reconectar.' });
     }
   });
 

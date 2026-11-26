@@ -32,7 +32,7 @@ Sem `VITE_GOOGLE_CLIENT_ID` o app funciona normalmente; só a integração com a
    - Não precisa de URI de redirecionamento nem de client secret.
 5. Copie o ID do cliente para `.env.local`:
    `VITE_GOOGLE_CLIENT_ID=1234-abc.apps.googleusercontent.com`
-6. No app: ⚙ **Ajustes → Conectar Google Agenda**.
+6. No app: **Mais → Ajustes → Conectar Google Agenda**.
 
 Escopos pedidos: `calendar.events` (criar, ler e editar eventos) e `drive.appdata` (pasta privada do app no Drive: o app só vê o arquivo que ele mesmo cria, nunca seus outros arquivos). O Google limita o token de apps só de navegador a ~1 h. O app o renova sozinho em segundo plano (sem popup, enquanto você estiver logado no Google) e guarda o token neste aparelho; se a renovação falhar, basta tocar em Sincronizar para reconectar. Sessões realmente longas exigiriam um backend com refresh token.
 
@@ -56,7 +56,7 @@ Limites conhecidos: só repetições diárias ou semanais em dias fixos viram h�
 O layout é responsivo: em telas largas aparece o menu lateral e os hábitos em duas colunas; no celular, a barra inferior. Para os dados ficarem iguais nos dois:
 
 1. Publique o `dist/` (veja "Instalar") e abra a mesma URL no celular e no computador.
-2. Nos dois: ⚙ **Ajustes → Conectar** com a mesma conta Google e marque **Sincronizar entre aparelhos (Google Drive)**.
+2. Nos dois: **Mais → Ajustes → Conectar** com a mesma conta Google e marque **Sincronizar entre aparelhos (Google Drive)**.
 
 Os hábitos, o histórico (dia a dia), as anotações, tarefas, categorias e sessões de foco ficam num único arquivo `ritmo-data.json` na pasta privada do app. Sincroniza ao abrir, ao voltar para a aba, a cada minuto e ~5 s depois de editar. O merge é por item (vence a edição mais recente) e por dia no histórico; exclusões se propagam por "lápides". Timer e ajustes do Google são de cada aparelho e não vão para o Drive. Se dois aparelhos gravarem no mesmo segundo, a próxima sincronização reconcilia; o histórico de dias diferentes nunca se perde.
 
