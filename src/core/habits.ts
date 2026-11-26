@@ -26,10 +26,23 @@ export function frequencyLabel(freq: Frequency): string {
   return [...freq.days].sort((a, b) => a - b).map((d) => names[d]).join(', ') || 'Nenhum dia';
 }
 
+/** Dias concluídos desde o domingo da semana de `key` até `until`, inclusive. */
+export function doneInWeek(h: Habit, key: DateKey, until: DateKey = addDays(startOfWeek(key), 6)): number {
+  let n = 0;
+  for (let d = startOfWeek(key); d <= until; d = addDays(d, 1)) if (h.log[d] === 'done') n++;
+  return n;
+}
+
+export function habitFrequencyLabel(h: Habit): string {
+  return h.weeklyTimes ? `${h.weeklyTimes}x por semana` : frequencyLabel(h.frequency);
+}
+
 /** O hábito está previsto para esse dia? (considera início, meta final e frequência) */
 export function isDue(h: Habit, key: DateKey): boolean {
   if (key < h.startDate) return false;
   if (h.targetDate && key > h.targetDate) return false;
+  // meta semanal batida em dias anteriores: não é mais cobrado nesta semana
+  if (h.weeklyTimes) return h.log[key] === 'done' || doneInWeek(h, key, addDays(key, -1)) < h.weeklyTimes;
   return frequencyIncludes(h.frequency, weekday(key));
 }
 
@@ -37,6 +50,7 @@ export function cellStatus(h: Habit, key: DateKey, today: DateKey): CellStatus {
   const logged = h.log[key];
   if (logged) return logged;
   if (!isDue(h, key)) return 'off';
+  if (h.weeklyTimes && key < today) return 'off'; // na meta semanal, um dia isolado não conta como falta
   return key < today ? 'missed' : 'pending';
 }
 
@@ -89,15 +103,54 @@ export function computeStats(h: Habit, today: DateKey): HabitStats {
   }
 
   const total = done + missed;
-  return {
+  const daily = {
     score: Math.round(score * 100),
     rate: total === 0 ? 0 : Math.round((done / total) * 100),
     currentStreak: current,
     bestStreak: best,
+  };
+  return {
+    ...(h.weeklyTimes ? weeklyStats(h, h.weeklyTimes, from, today) : daily),
     doneWeek,
     doneMonth,
     doneYear,
     doneTotal: done,
+  };
+}
+
+/** Na meta semanal, pontuação, taxa e sequência contam semanas. A semana em andamento só entra depois de batida. */
+function weeklyStats(h: Habit, times: number, from: DateKey, today: DateKey) {
+  const m = Math.pow(0.5, 1 / 4); // meia-vida de 4 semanas
+  let score = 0;
+  let current = 0;
+  let best = 0;
+  let got = 0;
+  let wanted = 0;
+  for (let week = startOfWeek(from); week <= today; week = addDays(week, 7)) {
+    const end = addDays(week, 6);
+    let available = 0;
+    let done = 0;
+    for (let d = week; d <= end; d = addDays(d, 1)) {
+      if (h.log[d] === 'done') done++;
+      const inRange = d >= from && (!h.targetDate || d <= h.targetDate);
+      if (inRange && h.log[d] !== 'skipped') available++;
+    }
+    // semanas incompletas (início, meta final, dias pulados) pedem no máximo os dias disponíveis
+    const required = Math.min(times, available);
+    if (required === 0) continue;
+    const met = done >= required;
+    if (!met && end >= today) continue;
+    got += Math.min(done, required);
+    wanted += required;
+    score = score * m + (1 - m) * Math.min(1, done / required);
+    current = met ? current + 1 : 0;
+    best = Math.max(best, current);
+  }
+  return {
+    score: Math.round(score * 100),
+    rate: wanted === 0 ? 0 : Math.round((got / wanted) * 100),
+    currentStreak: current,
+    bestStreak: best,
   };
 }
 
@@ -127,3 +180,5 @@ export function periodOf(time: string | null): Period {
 }
 
 export const diasLabel = (n: number): string => `${n} ${n === 1 ? 'dia' : 'dias'}`;
+
+export const streakLabel = (h: Habit, n: number): string => (h.weeklyTimes ? `${n} ${n === 1 ? 'semana' : 'semanas'}` : diasLabel(n));

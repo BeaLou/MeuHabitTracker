@@ -7,7 +7,7 @@ import { googleConfigured } from '../google/auth';
 export type HabitDraft = Pick<
   Habit,
   | 'name' | 'description' | 'emoji' | 'categoryId' | 'priority' | 'frequency' | 'startDate' | 'targetDate'
-  | 'time' | 'durationMin' | 'reminderMinutes' | 'syncToCalendar'
+  | 'weeklyTimes' | 'goal' | 'time' | 'durationMin' | 'reminderMinutes' | 'syncToCalendar'
 >;
 
 export function draftFrom(h?: Habit, categoryId?: string): HabitDraft {
@@ -18,6 +18,8 @@ export function draftFrom(h?: Habit, categoryId?: string): HabitDraft {
     categoryId: h?.categoryId ?? categoryId ?? '',
     priority: h?.priority ?? 5,
     frequency: h?.frequency ?? { type: 'daily' },
+    weeklyTimes: h?.weeklyTimes,
+    goal: h?.goal,
     startDate: h?.startDate ?? todayKey(),
     targetDate: h?.targetDate ?? null,
     time: h?.time ?? null,
@@ -56,7 +58,10 @@ export function HabitForm({ initial, categories, googleConnected, submitLabel, o
     set('frequency', { type: 'weekdays', days });
   };
 
-  const canSync = googleConnected && !!d.time;
+  const weekly = d.weeklyTimes !== undefined;
+  const canSync = googleConnected && !!d.time && !weekly;
+  const setGoal = (patch: Partial<NonNullable<HabitDraft['goal']>>) =>
+    set('goal', { target: 0, unit: '', step: 1, ...d.goal, ...patch });
   const invalid = d.name.trim() === '' || (freq.type === 'weekdays' && freq.days.length === 0);
 
   return (
@@ -65,7 +70,10 @@ export function HabitForm({ initial, categories, googleConnected, submitLabel, o
       onSubmit={(e) => {
         e.preventDefault();
         if (invalid) return;
-        onSubmit({ ...d, name: d.name.trim(), syncToCalendar: d.syncToCalendar && !!d.time });
+        const goal = d.goal && d.goal.target > 0
+          ? { target: d.goal.target, unit: d.goal.unit.trim(), step: Math.min(d.goal.target, Math.max(1, d.goal.step)) }
+          : undefined;
+        onSubmit({ ...d, goal, name: d.name.trim(), syncToCalendar: d.syncToCalendar && !!d.time && !weekly });
       }}
     >
       <div className="field">
@@ -98,18 +106,42 @@ export function HabitForm({ initial, categories, googleConnected, submitLabel, o
         <label htmlFor="h-freq">Frequência</label>
         <select
           id="h-freq"
-          value={freq.type}
-          onChange={(e) => set('frequency', (e.target.value === 'daily' ? { type: 'daily' } : { type: 'weekdays', days: [1, 3, 5] }) as Frequency)}
+          value={weekly ? 'weekly' : freq.type}
+          onChange={(e) => {
+            const v = e.target.value;
+            set('weeklyTimes', v === 'weekly' ? 3 : undefined);
+            set('frequency', (v === 'weekdays' ? { type: 'weekdays', days: [1, 3, 5] } : { type: 'daily' }) as Frequency);
+          }}
         >
           <option value="daily">Todos os dias</option>
           <option value="weekdays">Dias específicos</option>
+          <option value="weekly">Vezes por semana</option>
         </select>
+        {weekly && (
+          <select aria-label="Quantas vezes por semana" value={d.weeklyTimes} onChange={(e) => set('weeklyTimes', Number(e.target.value))}>
+            {[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}x por semana, em qualquer dia</option>)}
+          </select>
+        )}
         {freq.type === 'weekdays' && (
           <div className="emoji-grid" style={{ marginTop: 4 }}>
             {WEEKDAY_LETTER.map((l, i) => (
               <button type="button" key={i} className={freq.days.includes(i) ? 'on' : ''} onClick={() => toggleDay(i)} aria-label={`Dia ${i}`}>{l}</button>
             ))}
           </div>
+        )}
+      </div>
+
+      <div className="field">
+        <span className="label">Meta por dia (opcional)</span>
+        <div className="inline">
+          <input aria-label="Quantidade da meta" type="number" inputMode="numeric" min={0} style={{ flex: 1, minWidth: 0 }} placeholder="Ex.: 8" value={d.goal?.target || ''} onChange={(e) => setGoal({ target: Math.max(0, Math.round(Number(e.target.value) || 0)) })} />
+          <input aria-label="Unidade da meta" style={{ flex: 2, minWidth: 0 }} placeholder="copos, páginas, min" value={d.goal?.unit ?? ''} onChange={(e) => setGoal({ unit: e.target.value })} />
+        </div>
+        {!!d.goal?.target && (
+          <label className="inline">
+            Cada toque soma
+            <input type="number" inputMode="numeric" min={1} style={{ width: 90 }} value={d.goal.step || ''} onChange={(e) => setGoal({ step: Math.max(0, Math.round(Number(e.target.value) || 0)) })} />
+          </label>
         )}
       </div>
 
@@ -162,6 +194,7 @@ export function HabitForm({ initial, categories, googleConnected, submitLabel, o
         </label>
         {!googleConfigured && <span className="hint">Configure o Google em Mais → Ajustes para ativar.</span>}
         {googleConfigured && !googleConnected && <span className="hint">Conecte sua conta do Google em Mais → Ajustes.</span>}
+        {weekly && <span className="hint">Hábitos com meta semanal não têm dia fixo, então não vão para a agenda. Se já houver um evento criado pelo Ritmo, ele será removido.</span>}
         {googleConnected && !d.time && <span className="hint">Defina um horário para aparecer na agenda.</span>}
       </div>
 

@@ -1,6 +1,7 @@
 import { challengeHabits } from './core/challenge';
 import { todayKey, type DateKey } from './core/dates';
 import { createInitialState, exampleHabits, makeHabit, makeTask, newId } from './core/defaults';
+import { applyStatus, tapGoal } from './core/goals';
 import { nextStatus } from './core/habits';
 import type { BookInfo } from './core/books';
 import { percentOf } from './core/progress';
@@ -35,19 +36,17 @@ export function removeHabit(id: string) {
   });
 }
 
+// marcar um dia não é "edição do hábito": não mexe em updatedAt (não dispara a agenda),
+// mas o carimbo do dia permite juntar com outros aparelhos, inclusive ao desmarcar
+const changeDay = (id: string, change: (h: Habit) => Habit) =>
+  store.update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === id ? change(h) : h)) }));
+
 export function setDayStatus(id: string, key: DateKey, status: DayStatus | null) {
-  store.update((s) => ({
-    ...s,
-    habits: s.habits.map((h) => {
-      if (h.id !== id) return h;
-      const log = { ...h.log };
-      if (status) log[key] = status;
-      else delete log[key];
-      // marcar um dia não é "edição do hábito": não mexe em updatedAt (não dispara a agenda),
-      // mas o carimbo do dia permite juntar com outros aparelhos, inclusive ao desmarcar
-      return { ...h, log, logAt: { ...h.logAt, [key]: Date.now() } };
-    }),
-  }));
+  changeDay(id, (h) => applyStatus(h, key, status, Date.now()));
+}
+
+export function addAmount(id: string, key: DateKey) {
+  changeDay(id, (h) => tapGoal(h, key, Date.now()));
 }
 
 export function cycleDay(id: string, key: DateKey) {

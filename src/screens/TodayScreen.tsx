@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addExamples, cycleDay, toggleTask } from '../actions';
+import { addAmount, addExamples, cycleDay, toggleTask } from '../actions';
 import { WEEKDAY_SHORT, addDays, dayNumber, fromKey, startOfWeek, todayKey, formatLong } from '../core/dates';
-import { PERIODS, cellStatus, isDue, periodOf } from '../core/habits';
+import { amountOf } from '../core/goals';
+import { PERIODS, cellStatus, doneInWeek, isDue, periodOf } from '../core/habits';
 import type { AppState } from '../core/types';
 import { ChallengeCard } from '../components/ChallengeCard';
 import { latestProgress, percentOf } from '../core/progress';
@@ -125,6 +126,8 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
             <button className="main" onClick={() => onOpenHabit(h.id)}>
               <div className="title">{h.name}</div>
               <div className="sub">
+                {h.goal && <span>{amountOf(h, selected)} de {h.goal.target} {h.goal.unit}</span>}
+                {h.weeklyTimes && <span>{doneInWeek(h, selected)} de {h.weeklyTimes} na semana</span>}
                 {h.time && <span><Icon name="timer" /> {h.time}</span>}
                 {h.gcal && <span aria-label="Na agenda"><Icon name="calendar" /></span>}
               </div>
@@ -132,9 +135,10 @@ export function TodayScreen({ state, onOpenHabit, onEditTask, onNewHabit, onOpen
             <button
               className={`check ${st === 'done' ? 'done' : st === 'skipped' ? 'skipped' : ''}`}
               disabled={future}
-              onClick={() => cycleDay(h.id, selected)}
-              aria-label={`${h.name}: ${st}`}
+              onClick={() => (h.goal ? addAmount(h.id, selected) : cycleDay(h.id, selected))}
+              aria-label={h.goal ? `${h.name}: ${amountOf(h, selected)} de ${h.goal.target} ${h.goal.unit}. ${st === 'done' ? 'Desfazer um toque' : `Somar ${h.goal.step}`}` : `${h.name}: ${st}`}
             >
+              {h.goal && st !== 'done' && st !== 'skipped' && <Icon name="plus" />}
               {st === 'done' && <Icon name="check" />}
               {st === 'skipped' && <Icon name="skip" />}
             </button>
