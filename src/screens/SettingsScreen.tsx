@@ -6,6 +6,7 @@ import type { AppState } from '../core/types';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { clearToken, disconnectGoogle, getAccessToken, googleConfigured } from '../google/auth';
+import { CategoriesScreen } from './CategoriesScreen';
 import { driveSyncNow } from '../google/drive';
 import { adoptCandidate, listImportCandidates, syncNow, type ImportCandidate } from '../google/sync';
 import { askNotificationPermission, notificationsSupported } from '../notify';
@@ -77,6 +78,7 @@ export function SettingsScreen({ state, onBack }: { state: AppState; onBack: () 
   const g = state.google;
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [showCategories, setShowCategories] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [perm, setPerm] = useState<NotificationPermission>(notificationsSupported() ? Notification.permission : 'denied');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -134,6 +136,9 @@ export function SettingsScreen({ state, onBack }: { state: AppState; onBack: () 
         <h1>Ajustes</h1>
       </div>
       <div className="screen">
+        <div className="section-title">Organização</div>
+        <button className="btn ghost" style={{ width: '100%' }} onClick={() => setShowCategories(true)}><Icon name="categories" /> Categorias</button>
+
         <div className="section-title">Conta Google</div>
         {!googleConfigured ? (
           <p className="warn">
@@ -214,6 +219,15 @@ export function SettingsScreen({ state, onBack }: { state: AppState; onBack: () 
         </div>
         <p className="hint" style={{ marginTop: 8 }}>Os dados ficam só neste aparelho (armazenamento local do navegador). Faça backup de vez em quando.</p>
       </div>
+      {showCategories && (
+        <div className="app overlay">
+          <div className="topbar">
+            <button className="icon-btn" onClick={() => setShowCategories(false)} aria-label="Voltar"><Icon name="back" /></button>
+            <h1>Categorias</h1>
+          </div>
+          <div className="screen"><CategoriesScreen state={state} /></div>
+        </div>
+      )}
       {showImport && <ImportSheet state={state} onClose={() => setShowImport(false)} />}
     </div>
   );

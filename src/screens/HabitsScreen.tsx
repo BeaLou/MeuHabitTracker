@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { todayKey } from '../core/dates';
 import type { AppState } from '../core/types';
+import { ChallengeCard } from '../components/ChallengeCard';
+import { Icon } from '../components/Icon';
 import { HabitCard } from '../components/HabitCard';
 
 interface Props {
@@ -22,7 +24,7 @@ export function HabitsScreen({ state, onOpenHabit, onNewHabit, onOpenChallenge }
 
   return (
     <div>
-      <button className="challenge-entry" onClick={onOpenChallenge}>🌸 Desafio 75 <span>Abrir ›</span></button>
+      <ChallengeCard habits={state.habits} onOpen={onOpenChallenge} />
       <div className="chips">
         <button className={`chip${cat === 'all' ? ' on' : ''}`} onClick={() => setCat('all')}>Tudo</button>
         {state.categories.map((c) => (
@@ -32,8 +34,9 @@ export function HabitsScreen({ state, onOpenHabit, onNewHabit, onOpenChallenge }
 
       {active.length === 0 && (
         <div className="empty">
-          <div className="big">🎯</div>
-          <p>Nenhum hábito {cat === 'all' ? 'ainda' : 'nesta categoria'}.</p>
+          <Icon name="search" />
+          <p className="lead">Nenhuma pista por aqui ainda.</p>
+          <p>Nenhum hábito {cat === 'all' ? 'criado' : 'nesta categoria'}.</p>
           <button className="btn" onClick={onNewHabit}>Criar hábito</button>
         </div>
       )}

@@ -54,7 +54,7 @@ export function TasksScreen({ state, onEditTask }: Props) {
       </form>
 
       {pending.length === 0 && done.length === 0 && (
-        <div className="empty"><div className="big">✅</div><p>Nenhuma tarefa. Escreva uma acima.</p></div>
+        <div className="empty"><Icon name="search" /><p className="lead">Nenhuma pista por aqui ainda.</p><p>Nenhuma tarefa. Escreva uma acima.</p></div>
       )}
       {pending.map((t) => row(t.id))}
 
